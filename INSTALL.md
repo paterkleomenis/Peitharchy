@@ -61,6 +61,7 @@ The script automatically:
    - Waybar config & styles → ~/.config/waybar/
    - Rofi config → ~/.config/rofi/
    - Scripts → ~/.local/bin/ and ~/.config/waybar/scripts/
+   - GNOME color scheme → prefer-dark (via gsettings)
 8. **Copies wallpapers** to ~/Pictures/wallpapers/
 9. **Configures GTK theme** (dark mode + Kora icons)
 10. **Updates paths** with your actual username
@@ -80,6 +81,7 @@ After running the script and rebooting:
    - Waybar at the top
    - All keybindings configured
    - Scripts functional
+   - GNOME/GTK dark mode enabled
 
 ## Customization
 
@@ -157,6 +159,16 @@ ls ~/.local/share/icons/ | grep kora
 Check GTK settings:
 ```bash
 cat ~/.config/gtk-3.0/settings.ini
+```
+
+Check GNOME color scheme:
+```bash
+gsettings get org.gnome.desktop.interface color-scheme
+```
+
+If needed, manually set it:
+```bash
+gsettings set org.gnome.desktop.interface color-scheme "prefer-dark"
 ```
 
 Run `nwg-look` to reapply settings.

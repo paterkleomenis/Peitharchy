@@ -125,10 +125,10 @@ print_step "Copying Hyprland configuration files..."
 if [ -d "$SCRIPT_DIR/hyprland" ]; then
     cp -r "$SCRIPT_DIR/hyprland"/* ~/.config/hypr/
 
-    # Update hyprpaper.conf with current username
+    # Update hyprpaper.conf with current user's home directory
     if [ -f ~/.config/hypr/hyprpaper.conf ]; then
-        sed -i "s|/home/pater/|/home/$CURRENT_USER/|g" ~/.config/hypr/hyprpaper.conf
-        print_info "Updated hyprpaper.conf with your username"
+        sed -i "s|\$HOME|$HOME|g" ~/.config/hypr/hyprpaper.conf
+        print_info "Updated hyprpaper.conf with your home directory"
     fi
 
     print_step "Hyprland configs copied successfully!"
@@ -186,9 +186,9 @@ print_step "Copying GTK configuration files..."
 if [ -d "$SCRIPT_DIR/gtk-3.0" ]; then
     cp -r "$SCRIPT_DIR/gtk-3.0"/* ~/.config/gtk-3.0/
 
-    # Update bookmarks with current username
+    # Update bookmarks with current user's home directory
     if [ -f ~/.config/gtk-3.0/bookmarks ]; then
-        sed -i "s|/home/pater/|/home/$CURRENT_USER/|g" ~/.config/gtk-3.0/bookmarks
+        sed -i "s|\$HOME|$HOME|g" ~/.config/gtk-3.0/bookmarks
     fi
 
     print_step "GTK 3.0 configs copied!"
@@ -242,6 +242,11 @@ gtk-cursor-theme-size=24
 EOF
 
 print_step "GTK theme configured (dark mode with Kora icons)!"
+
+# Set GNOME/GTK dark mode preference
+print_step "Setting GNOME color scheme to dark mode..."
+gsettings set org.gnome.desktop.interface color-scheme "prefer-dark"
+print_step "GNOME dark mode enabled!"
 
 # Set environment variables for Hyprland
 print_step "Configuring environment variables..."

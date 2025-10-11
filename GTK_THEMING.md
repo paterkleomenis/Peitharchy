@@ -108,6 +108,11 @@ The installation script automatically:
    env = XCURSOR_SIZE,24
    ```
 
+6. Sets GNOME/GTK color scheme preference:
+   ```bash
+   gsettings set org.gnome.desktop.interface color-scheme "prefer-dark"
+   ```
+
 ## Applications Affected
 
 ✅ **GTK3 Applications:**
@@ -184,7 +189,18 @@ gtk-cursor-theme-size=24
    GTK_THEME=Adwaita-dark app-name
    ```
 
-3. **Verify environment variables:**
+3. **Verify GNOME color scheme:**
+   ```bash
+   gsettings get org.gnome.desktop.interface color-scheme
+   # Should return: 'prefer-dark'
+   ```
+
+4. **Manually set dark mode if needed:**
+   ```bash
+   gsettings set org.gnome.desktop.interface color-scheme "prefer-dark"
+   ```
+
+5. **Verify environment variables:**
    ```bash
    echo $GTK_THEME
    ```
@@ -290,6 +306,7 @@ This GTK theming setup ensures:
 - ✅ Smooth Breeze cursors
 - ✅ Proper font rendering
 - ✅ Automatic username replacement in configs
+- ✅ GNOME color scheme set to prefer-dark
 - ✅ Easy customization via nwg-look or manual editing
 
 Enjoy your beautiful, consistent dark theme! 🌙

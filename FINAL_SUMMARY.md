@@ -49,7 +49,7 @@ Scripts are copied to **TWO** locations:
 ### ✅ 7. Wallpapers with Dynamic Username
 - **Wallpapers**: 3 included (black.png, picklerick.png, windowidget.png)
 - **Copied to**: `~/Pictures/wallpapers/`
-- **Auto-updated**: `/home/pater/` replaced with `/home/YOUR_USERNAME/`
+- **Auto-updated**: `$HOME` variable replaced with your actual home directory
 - **No manual editing required!**
 
 ---
@@ -172,13 +172,14 @@ Peitharchy/
 9. ✅ Copies Rofi config
 10. ✅ Copies GTK configs (GTK2/3/4)
 11. ✅ Copies wallpapers (with username replacement)
-12. ✅ Configures environment variables
-13. ✅ Enables greetd login manager
-14. ✅ Adds user to necessary groups
+12. ✅ Sets GNOME color scheme to prefer-dark
+13. ✅ Configures environment variables
+14. ✅ Enables greetd login manager
+15. ✅ Adds user to necessary groups
 
 ### Auto-Updated Files:
-- `hyprpaper.conf` - `/home/pater/` → `/home/YOUR_USERNAME/`
-- `bookmarks` - `/home/pater/` → `/home/YOUR_USERNAME/`
+- `hyprpaper.conf` - `$HOME` → your actual home directory
+- `bookmarks` - `$HOME` → your actual home directory
 
 ---
 
@@ -203,6 +204,7 @@ Peitharchy/
 - ✅ GTK2 (legacy apps)
 - ✅ GTK3 (most apps)
 - ✅ GTK4 (modern apps)
+- ✅ GNOME/GTK apps (gsettings prefer-dark)
 - ✅ Hyprland environment
 - ✅ Custom colors.css
 
@@ -282,6 +284,7 @@ SUPER + Q  →  Close window
 - Waybar scripts work immediately
 - Rofi with Kora icons
 - All keybindings ready
+- GNOME color scheme set to prefer-dark
 
 ✅ **Professional Documentation**
 - 9 markdown files
