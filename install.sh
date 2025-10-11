@@ -179,51 +179,69 @@ else
     print_warning "Wallpapers directory not found. Skipping wallpapers."
 fi
 
-# Configure GTK theme (dark mode with Kora icons)
-print_step "Configuring GTK theme..."
+# Copy GTK configuration files
+print_step "Copying GTK configuration files..."
 
-# GTK 3.0 settings
-cat > ~/.config/gtk-3.0/settings.ini <<EOF
+# Copy GTK 3.0 configs
+if [ -d "$SCRIPT_DIR/gtk-3.0" ]; then
+    cp -r "$SCRIPT_DIR/gtk-3.0"/* ~/.config/gtk-3.0/
+
+    # Update bookmarks with current username
+    if [ -f ~/.config/gtk-3.0/bookmarks ]; then
+        sed -i "s|/home/pater/|/home/$CURRENT_USER/|g" ~/.config/gtk-3.0/bookmarks
+    fi
+
+    print_step "GTK 3.0 configs copied!"
+else
+    print_warning "gtk-3.0 directory not found. Creating default dark theme config..."
+    cat > ~/.config/gtk-3.0/settings.ini <<EOF
 [Settings]
 gtk-application-prefer-dark-theme=1
 gtk-theme-name=Adwaita-dark
 gtk-icon-theme-name=kora
-gtk-font-name=Inter 11
-gtk-cursor-theme-name=Breeze
+gtk-font-name=Inter 10
+gtk-cursor-theme-name=breeze_cursors
 gtk-cursor-theme-size=24
-gtk-toolbar-style=GTK_TOOLBAR_BOTH
-gtk-toolbar-icon-size=GTK_ICON_SIZE_LARGE_TOOLBAR
-gtk-button-images=1
-gtk-menu-images=1
+gtk-enable-animations=true
+gtk-button-images=true
+gtk-menu-images=true
 gtk-enable-event-sounds=1
 gtk-enable-input-feedback-sounds=0
 gtk-xft-antialias=1
 gtk-xft-hinting=1
-gtk-xft-hintstyle=hintslight
+gtk-xft-hintstyle=hintfull
 gtk-xft-rgba=rgb
 EOF
+fi
 
-# GTK 4.0 settings
-cat > ~/.config/gtk-4.0/settings.ini <<EOF
+# Copy GTK 4.0 configs
+if [ -d "$SCRIPT_DIR/gtk-4.0" ]; then
+    cp -r "$SCRIPT_DIR/gtk-4.0"/* ~/.config/gtk-4.0/
+    print_step "GTK 4.0 configs copied!"
+else
+    print_warning "gtk-4.0 directory not found. Creating default dark theme config..."
+    cat > ~/.config/gtk-4.0/settings.ini <<EOF
 [Settings]
 gtk-application-prefer-dark-theme=1
-gtk-theme-name=Adwaita-dark
 gtk-icon-theme-name=kora
-gtk-font-name=Inter 11
-gtk-cursor-theme-name=Breeze
+gtk-font-name=Inter 10
+gtk-cursor-theme-name=breeze_cursors
+gtk-cursor-theme-size=24
+gtk-enable-animations=true
+EOF
+fi
+
+# Create .gtkrc-2.0 for older GTK2 apps
+print_step "Creating GTK2 config..."
+cat > ~/.gtkrc-2.0 <<EOF
+gtk-theme-name="Adwaita-dark"
+gtk-icon-theme-name="kora"
+gtk-font-name="Inter 10"
+gtk-cursor-theme-name="breeze_cursors"
 gtk-cursor-theme-size=24
 EOF
 
 print_step "GTK theme configured (dark mode with Kora icons)!"
-
-# Create .gtkrc-2.0 for older GTK2 apps
-cat > ~/.gtkrc-2.0 <<EOF
-gtk-theme-name="Adwaita-dark"
-gtk-icon-theme-name="kora"
-gtk-font-name="Inter 11"
-gtk-cursor-theme-name="Breeze"
-gtk-cursor-theme-size=24
-EOF
 
 # Set environment variables for Hyprland
 print_step "Configuring environment variables..."
@@ -234,7 +252,7 @@ if [ -f ~/.config/hypr/environment.conf ]; then
 
 # GTK Theme Configuration
 env = GTK_THEME,Adwaita-dark
-env = XCURSOR_THEME,Breeze
+env = XCURSOR_THEME,breeze_cursors
 env = XCURSOR_SIZE,24
 EOF
         print_info "Added GTK theme variables to environment.conf"
@@ -297,7 +315,8 @@ echo "Theme configuration:"
 echo "  - GTK: Adwaita-dark (dark mode)"
 echo "  - Icons: Kora"
 echo "  - Cursor: Breeze"
-echo "  - Font: Inter 11"
+echo "  - Font: Inter 10"
+echo "  - Custom colors.css applied"
 echo ""
 echo "You can further customize GTK themes using:"
 echo "  - nwg-look (installed)"

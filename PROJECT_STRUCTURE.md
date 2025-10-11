@@ -18,6 +18,15 @@ Peitharchy - Hyprland Setup for Arch Linux
 │   ├── picklerick.png
 │   └── windowidget.png
 │
+├── 🎨 gtk-3.0/              GTK3 dark theme configuration
+│   ├── settings.ini         GTK3 settings (dark mode + Kora icons)
+│   ├── colors.css           Custom dark color scheme
+│   └── bookmarks            File manager bookmarks
+│
+├── 🎨 gtk-4.0/              GTK4 dark theme configuration
+│   ├── settings.ini         GTK4 settings (dark mode + Kora icons)
+│   └── colors.css           Custom dark color scheme
+│
 ├── ⚙️  hyprland/            Hyprland configurations
 │   ├── hyprland.conf        Main config
 │   ├── keybinds.conf        Keyboard shortcuts
@@ -45,13 +54,14 @@ Peitharchy - Hyprland Setup for Arch Linux
 
 📋 Features:
    ✓ Automatic package installation
-   ✓ Dark theme (GTK + Kora icons)
+   ✓ Dark theme (GTK2/3/4 + Kora icons + colors.css)
    ✓ Dual terminals (kitty + ghostty)
    ✓ Dynamic username replacement
    ✓ Waybar with custom scripts
    ✓ Complete Hyprland setup
    ✓ Wallpapers pre-configured
    ✓ Greetd login manager
+   ✓ Breeze cursors configured
 
 🔧 What Gets Installed:
    • 60+ packages from official repos
@@ -59,13 +69,15 @@ Peitharchy - Hyprland Setup for Arch Linux
    • 1 Flatpak (MissionCenter)
    • Kora icon theme
    • All configurations
+   • GTK dark theme with custom colors
 
 📍 Installation Targets:
    ~/.config/hypr/              → Hyprland configs
    ~/.config/waybar/            → Waybar + scripts
    ~/.config/rofi/              → Rofi launcher
-   ~/.config/gtk-3.0/           → GTK3 dark theme
-   ~/.config/gtk-4.0/           → GTK4 dark theme
+   ~/.config/gtk-3.0/           → GTK3 dark theme + colors.css
+   ~/.config/gtk-4.0/           → GTK4 dark theme + colors.css
+   ~/.gtkrc-2.0                 → GTK2 dark theme (legacy apps)
    ~/.local/bin/                → User scripts
    ~/.local/share/icons/        → Kora icons
    ~/Pictures/wallpapers/       → Wallpapers

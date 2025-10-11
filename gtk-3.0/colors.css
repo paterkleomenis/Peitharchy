@@ -1,0 +1,75 @@
+/* --- Minimal dark override (GTK3) --- */
+@define-color bg    #202326; /* window background */
+@define-color base  #141618; /* content areas (lists, text, etc.) */
+@define-color text  #fcfcfc; /* default text */
+@define-color border #57595c; /* subtle borders */
+@define-color accent #3daee9; /* selection/focus */
+
+window,
+dialog,
+.background {
+    background-color: @bg;
+    color: @text;
+}
+
+textview,
+.view,
+list,
+treeview,
+iconview,
+notebook,
+scrolledwindow > viewport {
+    background-color: @base;
+    color: @text;
+}
+
+/* Headerbar / Titlebar */
+headerbar,
+.titlebar {
+    background-color: shade(@bg, 0.95);
+    color: @text;
+}
+
+/* Buttons */
+button {
+    background-color: shade(@bg, 1);
+    color: @text;
+    border-color: @border;
+}
+button:hover {
+    box-shadow: inset 0 0 0 1px @accent;
+}
+button:focus {
+    box-shadow: 0 0 0 2px @accent;
+}
+button:checked,
+button:active {
+    background-color: shade(@bg, 0.9);
+}
+
+/* Text entries */
+entry,
+searchentry,
+spinbutton,
+combobox {
+    background-color: @base;
+    color: @text;
+    border-color: @border;
+}
+
+/* Selection */
+selection,
+.view:selected,
+list row:selected,
+treeview:selected,
+text selection {
+    background-color: @accent;
+    color: @text;
+}
+
+/* Tooltips */
+tooltip {
+    background-color: shade(@bg, 0.95);
+    color: @text;
+    border-color: @border;
+}

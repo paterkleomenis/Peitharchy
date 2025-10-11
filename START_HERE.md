@@ -62,11 +62,12 @@ The `install.sh` script will:
 4. ✅ Install AUR packages (ghostty, xcursor-breeze)
 5. ✅ Set up **Flatpak** and install MissionCenter
 6. ✅ Extract and install **Kora icon theme**
-7. ✅ Copy all **configuration files**
-8. ✅ Set up **wallpapers** with your username
-9. ✅ Configure **GTK dark theme**
-10. ✅ Enable **greetd** login manager
-11. ✅ Add user to necessary groups
+7. ✅ Copy all **configuration files** (Hyprland, Waybar, Rofi)
+8. ✅ Copy **GTK configs** (dark theme + custom colors.css)
+9. ✅ Set up **wallpapers** with your username
+10. ✅ Configure **GTK dark theme** with Kora icons
+11. ✅ Enable **greetd** login manager
+12. ✅ Add user to necessary groups
 
 **Time Required**: ~15-30 minutes (depending on internet speed)
 
@@ -97,6 +98,8 @@ Peitharchy/
 ├── scripts/            🚀 Utility scripts (clipboard, night light, etc.)
 ├── rofi/               🎯 Rofi launcher config
 ├── wallpapers/         🖼️  Background images
+├── gtk-3.0/            🎨 GTK3 dark theme + colors.css
+├── gtk-4.0/            🎨 GTK4 dark theme + colors.css
 ├── config              📊 Waybar configuration
 ├── style.css           🎨 Waybar styling
 └── kora-1-7-2.tar.xz  🎨 Kora icon theme
@@ -146,7 +149,9 @@ All configurations are in your `~/.config/` directory:
 ~/.config/hypr/      # Hyprland settings
 ~/.config/waybar/    # Status bar + scripts
 ~/.config/rofi/      # App launcher
-~/.config/gtk-3.0/   # GTK theme
+~/.config/gtk-3.0/   # GTK3 theme + colors.css
+~/.config/gtk-4.0/   # GTK4 theme + colors.css
+~/.gtkrc-2.0         # GTK2 theme (older apps)
 ```
 
 **Change GTK theme visually:**
@@ -222,8 +227,10 @@ Hyprland, Waybar, Rofi, SwayNC, Kitty, Nautilus, PipeWire, Flatpak, and many mor
 - ✅ Username in all config files (no manual editing!)
 - ✅ Wallpaper paths set correctly
 - ✅ Scripts executable and in correct locations
-- ✅ Dark theme applied system-wide
+- ✅ Dark theme applied system-wide (GTK2/3/4)
 - ✅ Kora icons in all GTK apps
+- ✅ Custom colors.css for consistent dark theme
+- ✅ Breeze cursors configured
 - ✅ PipeWire audio ready to use
 
 ---
