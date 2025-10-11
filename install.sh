@@ -38,6 +38,9 @@ fi
 # Get the directory where the script is located
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
+# Get the current username
+CURRENT_USER="$USER"
+
 print_step "Starting Peitharchy installation..."
 echo ""
 
@@ -61,7 +64,8 @@ sudo pacman -S --needed --noconfirm \
   neovim nano curl wget unzip p7zip tar base-devel git \
   ttf-jetbrains-mono-nerd inter-font \
   noto-fonts noto-fonts-cjk noto-fonts-emoji \
-  gnome-system-monitor baobab pipewire pipewire-alsa pipewire-pulse pipewire-jack
+  gnome-system-monitor baobab pipewire pipewire-alsa pipewire-pulse pipewire-jack \
+  kitty gtk3 gtk4 nwg-look
 
 print_step "Main packages installed successfully!"
 
@@ -80,7 +84,7 @@ fi
 
 # Install AUR packages
 print_step "Installing AUR packages..."
-paru -S --needed --noconfirm xcursor-breeze
+paru -S --needed --noconfirm xcursor-breeze ghostty
 
 # Install Flatpak
 print_step "Installing Flatpak..."
@@ -108,25 +112,42 @@ fi
 print_step "Creating configuration directories..."
 mkdir -p ~/.config/hypr
 mkdir -p ~/.config/waybar
+mkdir -p ~/.config/waybar/scripts
 mkdir -p ~/.config/rofi
 mkdir -p ~/.config/swaync
+mkdir -p ~/.config/gtk-3.0
+mkdir -p ~/.config/gtk-4.0
 mkdir -p ~/.local/bin
+mkdir -p ~/Pictures/wallpapers
 
 # Copy Hyprland configuration files
 print_step "Copying Hyprland configuration files..."
 if [ -d "$SCRIPT_DIR/hyprland" ]; then
     cp -r "$SCRIPT_DIR/hyprland"/* ~/.config/hypr/
+
+    # Update hyprpaper.conf with current username
+    if [ -f ~/.config/hypr/hyprpaper.conf ]; then
+        sed -i "s|/home/pater/|/home/$CURRENT_USER/|g" ~/.config/hypr/hyprpaper.conf
+        print_info "Updated hyprpaper.conf with your username"
+    fi
+
     print_step "Hyprland configs copied successfully!"
 else
     print_warning "Hyprland directory not found. Skipping Hyprland configs."
 fi
 
-# Copy scripts
+# Copy scripts to both locations
 print_step "Copying scripts..."
 if [ -d "$SCRIPT_DIR/scripts" ]; then
+    # Copy to ~/.local/bin
     cp -r "$SCRIPT_DIR/scripts"/* ~/.local/bin/
     chmod +x ~/.local/bin/*.sh
-    print_step "Scripts copied and made executable!"
+
+    # Copy to waybar scripts directory
+    cp -r "$SCRIPT_DIR/scripts"/* ~/.config/waybar/scripts/
+    chmod +x ~/.config/waybar/scripts/*.sh
+
+    print_step "Scripts copied to both locations and made executable!"
 else
     print_warning "Scripts directory not found. Skipping scripts."
 fi
@@ -141,6 +162,83 @@ fi
 if [ -f "$SCRIPT_DIR/style.css" ]; then
     print_step "Copying Waybar style..."
     cp "$SCRIPT_DIR/style.css" ~/.config/waybar/style.css
+fi
+
+# Copy rofi config if it exists
+if [ -f "$SCRIPT_DIR/rofi/config.rasi" ]; then
+    print_step "Copying Rofi config..."
+    cp "$SCRIPT_DIR/rofi/config.rasi" ~/.config/rofi/config.rasi
+fi
+
+# Copy wallpapers
+print_step "Copying wallpapers..."
+if [ -d "$SCRIPT_DIR/wallpapers" ]; then
+    cp -r "$SCRIPT_DIR/wallpapers"/* ~/Pictures/wallpapers/
+    print_step "Wallpapers copied successfully!"
+else
+    print_warning "Wallpapers directory not found. Skipping wallpapers."
+fi
+
+# Configure GTK theme (dark mode with Kora icons)
+print_step "Configuring GTK theme..."
+
+# GTK 3.0 settings
+cat > ~/.config/gtk-3.0/settings.ini <<EOF
+[Settings]
+gtk-application-prefer-dark-theme=1
+gtk-theme-name=Adwaita-dark
+gtk-icon-theme-name=kora
+gtk-font-name=Inter 11
+gtk-cursor-theme-name=Breeze
+gtk-cursor-theme-size=24
+gtk-toolbar-style=GTK_TOOLBAR_BOTH
+gtk-toolbar-icon-size=GTK_ICON_SIZE_LARGE_TOOLBAR
+gtk-button-images=1
+gtk-menu-images=1
+gtk-enable-event-sounds=1
+gtk-enable-input-feedback-sounds=0
+gtk-xft-antialias=1
+gtk-xft-hinting=1
+gtk-xft-hintstyle=hintslight
+gtk-xft-rgba=rgb
+EOF
+
+# GTK 4.0 settings
+cat > ~/.config/gtk-4.0/settings.ini <<EOF
+[Settings]
+gtk-application-prefer-dark-theme=1
+gtk-theme-name=Adwaita-dark
+gtk-icon-theme-name=kora
+gtk-font-name=Inter 11
+gtk-cursor-theme-name=Breeze
+gtk-cursor-theme-size=24
+EOF
+
+print_step "GTK theme configured (dark mode with Kora icons)!"
+
+# Create .gtkrc-2.0 for older GTK2 apps
+cat > ~/.gtkrc-2.0 <<EOF
+gtk-theme-name="Adwaita-dark"
+gtk-icon-theme-name="kora"
+gtk-font-name="Inter 11"
+gtk-cursor-theme-name="Breeze"
+gtk-cursor-theme-size=24
+EOF
+
+# Set environment variables for Hyprland
+print_step "Configuring environment variables..."
+if [ -f ~/.config/hypr/environment.conf ]; then
+    # Check if GTK theme variables are already set
+    if ! grep -q "GTK_THEME" ~/.config/hypr/environment.conf; then
+        cat >> ~/.config/hypr/environment.conf <<EOF
+
+# GTK Theme Configuration
+env = GTK_THEME,Adwaita-dark
+env = XCURSOR_THEME,Breeze
+env = XCURSOR_SIZE,24
+EOF
+        print_info "Added GTK theme variables to environment.conf"
+    fi
 fi
 
 # Enable greetd service
@@ -185,12 +283,24 @@ echo ""
 echo "Configuration locations:"
 echo "  - Hyprland: ~/.config/hypr/"
 echo "  - Waybar: ~/.config/waybar/"
-echo "  - Scripts: ~/.local/bin/"
+echo "  - Rofi: ~/.config/rofi/"
+echo "  - Scripts: ~/.local/bin/ and ~/.config/waybar/scripts/"
 echo "  - Icons: ~/.local/share/icons/"
+echo "  - Wallpapers: ~/Pictures/wallpapers/"
+echo "  - GTK: ~/.config/gtk-3.0/ and ~/.config/gtk-4.0/"
 echo ""
-echo "To apply Kora icons:"
-echo "  - Use a tool like nwg-look (gtk3) or qt5ct/qt6ct (Qt)"
-echo "  - Or set GTK_THEME in your Hyprland environment config"
+echo "Installed terminals:"
+echo "  - kitty (default)"
+echo "  - ghostty"
+echo ""
+echo "Theme configuration:"
+echo "  - GTK: Adwaita-dark (dark mode)"
+echo "  - Icons: Kora"
+echo "  - Cursor: Breeze"
+echo "  - Font: Inter 11"
+echo ""
+echo "You can further customize GTK themes using:"
+echo "  - nwg-look (installed)"
 echo ""
 print_info "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo ""

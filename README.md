@@ -21,7 +21,8 @@ sudo pacman -S --needed \
   neovim nano curl wget unzip p7zip tar base-devel git \
   ttf-jetbrains-mono-nerd inter-font \
   noto-fonts noto-fonts-cjk noto-fonts-emoji \
-  gnome-system-monitor baobab pipewire pipewire-alsa pipewire-pulse pipewire-jack
+  gnome-system-monitor baobab pipewire pipewire-alsa pipewire-pulse pipewire-jack \
+  kitty gtk3 gtk4 nwg-look
 ```
 
 ## Install AUR helper (paru)
@@ -36,7 +37,7 @@ makepkg -si
 ## Install AUR packages
 
 ```
-paru -S xcursor-breeze
+paru -S xcursor-breeze ghostty
 ```
 
 ## Install Flatpak
@@ -56,6 +57,26 @@ flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flat
 ```
 flatpak install io.missioncenter.MissionCenter
 ```
+
+## Quick Install
+
+Simply run the included installation script:
+
+```
+./install.sh
+```
+
+This script will:
+- Install all required packages (pacman + AUR + Flatpak)
+- Install and configure Kora icon theme
+- Copy all configuration files (Hyprland, Waybar, Rofi, etc.)
+- Set up wallpapers with your username
+- Configure GTK dark theme with Kora icons
+- Set up scripts in the correct locations
+- Enable and configure greetd
+- Configure environment variables
+
+After installation, simply reboot and select Hyprland from tuigreet.
 
 ## Package overview
 
@@ -80,14 +101,18 @@ flatpak install io.missioncenter.MissionCenter
   - gst-plugins-good, gst-plugins-bad, gst-plugins-ugly
 - Editors/CLI:
   - neovim, nano, curl, wget, unzip, p7zip, tar, base-devel, git
+- Terminals:
+  - kitty, ghostty (AUR)
 - Fonts:
   - ttf-jetbrains-mono-nerd, inter-font,
   - noto-fonts, noto-fonts-cjk, noto-fonts-emoji
+- GTK/Theming:
+  - gtk3, gtk4, nwg-look
 - GNOME utilities:
   - gnome-system-monitor, baobab
 
 Removed compared to previous iterations: brightnessctl, zip, htop, btop, file-roller, gst-libav.
-AUR packages: xcursor-breeze (install via paru).
+AUR packages: xcursor-breeze, ghostty (install via paru).
 
 ## Post-install notes
 

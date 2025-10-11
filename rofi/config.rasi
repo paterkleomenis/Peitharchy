@@ -1,0 +1,107 @@
+configuration {
+  show-icons:            true;                       /* wofi: allow_images=true  */
+  drun-show-actions:     false;                      /* wofi: no_actions=true    */
+  case-sensitive:        false;                      /* wofi: insensitive=true   */
+  display-drun:          "🔍";    /* prompt text               */
+  icon-theme:            "kora";                     /* match your GTK theme (opt) */
+  scrollbar:             false;                      /* wofi: hide_scroll=true   */
+}
+
+* {
+  font:                  "Inter 12";
+  fg:                    #f2f2f2;
+  bg:                    rgba(24,24,24,0.60);
+  rowbg:                 rgba(24,24,24,0.10);
+  selbg:                 rgba(255,255,255,0.10);
+  bordercol:             rgba(24,24,24,0.20);
+}
+
+/* Window */
+window {
+  width:                 900px;        /* wofi width=900  */
+  height:                600px;        /* wofi height=600 */
+  location:              center;       /* wofi location=center */
+  border:                0px;
+  border-radius:         16px;         /* ~1rem */
+  background-color:      @bg;
+  padding:               12px;
+}
+
+/* Layout */
+mainbox {
+  spacing:               0px;
+  padding:               0px;
+  children:              [ inputbar, listview ];
+}
+
+/* Input / prompt */
+inputbar {
+  padding:               8px 16px;     /* 0.8rem 1rem */
+  background-color:      @bg;
+  border:                0px 0px 1px 0px;
+  border-color:          @bordercol;
+  border-radius:         16px 16px 0px 0px;
+}
+
+prompt {
+  enabled:               true;
+  text:                  "Search";
+  padding:               0px 8px 0px 0px;
+  background-color:      transparent;
+  text-color:            @fg;
+}
+
+/* hide the default ":" */
+textbox-prompt-colon { str: ""; expand: false; }
+
+/* Entry text in the inputbar */
+entry {
+  placeholder:           "Search";
+  background-color:      transparent;
+  text-color:            @fg;
+}
+
+/* List */
+listview {
+  dynamic:               false;
+  fixed-height:          true;
+  scrollbar:             false;
+  columns:               1;
+}
+
+/* -------- Rows  -------- */
+element normal.normal,
+element normal.active,
+element normal.urgent,
+element alternate.normal,
+element alternate.active,
+element alternate.urgent {
+    background-color: @rowbg;
+    text-color: #ffffff;
+    border: 0px;
+    border-radius: 6px;
+    padding: 6px 16px;
+}
+
+element selected.normal,
+element selected.active,
+element selected.urgent,
+element alternate.selected.normal,
+element alternate.selected.active,
+element alternate.selected.urgent {
+    background-color: @selbg;
+    text-color: #ffffff;
+    border: 0px;
+    border-radius: 6px;
+}
+
+
+/* Icon & text sizing (similar to #img/#text in Wofi) */
+element-icon {
+  size:                  40px;         /* smoother than 14; matches most icon themes */
+  horizontal-align:      0.0;
+}
+element-text {
+  vertical-align:        0.5;
+  highlight:             none;         /* no yellow match highlight */
+}
