@@ -38,9 +38,6 @@ fi
 # Get the directory where the script is located
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-# Get the current username
-CURRENT_USER="$USER"
-
 print_step "Starting Peitharchy installation..."
 echo ""
 
@@ -65,7 +62,7 @@ sudo pacman -S --needed --noconfirm \
   ttf-jetbrains-mono-nerd inter-font \
   noto-fonts noto-fonts-cjk noto-fonts-emoji \
   gnome-system-monitor baobab pipewire pipewire-alsa pipewire-pulse pipewire-jack \
-  kitty gtk3 gtk4 nwg-look
+  kitty gtk3 gtk4 nwg-look gnome-themes-extra dconf
 
 print_step "Main packages installed successfully!"
 
@@ -138,18 +135,17 @@ else
     print_warning "Hyprland directory not found. Skipping Hyprland configs."
 fi
 
-# Copy scripts to both locations
+# Copy scripts
 print_step "Copying scripts..."
 if [ -d "$SCRIPT_DIR/scripts" ]; then
     # Copy to ~/.local/bin
     cp -r "$SCRIPT_DIR/scripts"/* ~/.local/bin/
     chmod +x ~/.local/bin/*.sh
 
-    # Copy to waybar scripts directory
-    cp -r "$SCRIPT_DIR/scripts"/* ~/.config/waybar/scripts/
-    chmod +x ~/.config/waybar/scripts/*.sh
+    # Symlink to waybar scripts directory (avoid duplication)
+    ln -sf ~/.local/bin/*.sh ~/.config/waybar/scripts/
 
-    print_step "Scripts copied to both locations and made executable!"
+    print_step "Scripts copied and made executable!"
 else
     print_warning "Scripts directory not found. Skipping scripts."
 fi
@@ -218,22 +214,6 @@ gsettings set org.gnome.desktop.interface color-scheme "prefer-dark"
 gsettings set org.gnome.desktop.interface font-name "Inter,  10"
 print_step "GTK theme, icons, and font settings applied!"
 
-# Set environment variables for Hyprland
-print_step "Configuring environment variables..."
-if [ -f ~/.config/hypr/environment.conf ]; then
-    # Check if GTK theme variables are already set
-    if ! grep -q "GTK_THEME" ~/.config/hypr/environment.conf; then
-        cat >> ~/.config/hypr/environment.conf <<EOF
-
-# GTK Theme Configuration
-env = GTK_THEME,Adwaita-dark
-env = XCURSOR_THEME,breeze_cursors
-env = XCURSOR_SIZE,24
-EOF
-        print_info "Added GTK theme variables to environment.conf"
-    fi
-fi
-
 # Enable greetd service
 print_step "Enabling greetd service..."
 sudo systemctl enable greetd
@@ -294,10 +274,10 @@ echo "  - kitty (default)"
 echo "  - ghostty"
 echo ""
 echo "Theme configuration:"
-echo "  - GTK: Adwaita-dark (dark mode)"
+echo "  - GTK: HighContrastInverse (dark mode with custom colors)"
 echo "  - Icons: Kora"
 echo "  - Cursor: Breeze"
-echo "  - Font: Inter 10"
+echo "  - Font: Inter, 10"
 echo "  - Custom colors.css applied"
 echo ""
 echo "You can further customize GTK themes using:"
