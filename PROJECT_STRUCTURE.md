@@ -46,8 +46,11 @@ Peitharchy - Hyprland Setup for Arch Linux
 │   ├── power-menu.sh        Power options
 │   └── toggle-layout.sh     Keyboard layout switcher
 │
-└── 🎯 rofi/                 Application launcher
-    └── config.rasi          Rofi configuration
+├── 🎯 rofi/                 Application launcher
+│   └── config.rasi          Rofi configuration
+│
+└── 🔐 greetd/               Login manager configuration
+    └── config.toml          tuigreet settings
 
 🎯 Quick Start:
    ./install.sh
@@ -65,10 +68,10 @@ Peitharchy - Hyprland Setup for Arch Linux
 
 🔧 What Gets Installed:
    • 60+ packages from official repos
-   • 2 AUR packages (ghostty, xcursor-breeze)
+   • 2 AUR packages (ghostty, breeze)
    • 1 Flatpak (MissionCenter)
    • Kora icon theme
-   • All configurations
+   • All configurations (including greetd)
    • GTK dark theme with custom colors
 
 📍 Installation Targets:
@@ -77,10 +80,12 @@ Peitharchy - Hyprland Setup for Arch Linux
    ~/.config/rofi/              → Rofi launcher
    ~/.config/gtk-3.0/           → GTK3 dark theme + colors.css
    ~/.config/gtk-4.0/           → GTK4 dark theme + colors.css
-   ~/.gtkrc-2.0                 → GTK2 dark theme (legacy apps)
    ~/.local/bin/                → User scripts
    ~/.local/share/icons/        → Kora icons
    ~/Pictures/wallpapers/       → Wallpapers
+   ~/Downloads/                 → User downloads directory
+   ~/Documents/                 → User documents directory
+   /etc/greetd/                 → Login manager config
 
 ⏱️  Installation Time: ~15-30 minutes (first time)
 

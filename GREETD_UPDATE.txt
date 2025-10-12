@@ -1,0 +1,173 @@
+╔══════════════════════════════════════════════════════════════════╗
+║                                                                  ║
+║          ✅ GREETD CONFIG FOLDER ADDED ✅                       ║
+║                                                                  ║
+╚══════════════════════════════════════════════════════════════════╝
+
+🔐 NEW FEATURE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+The installation script now uses your greetd configuration:
+
+  greetd/
+  └── config.toml
+
+Instead of auto-generating, it copies YOUR config!
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📝 YOUR GREETD CONFIG
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Located at: greetd/config.toml
+
+[terminal]
+vt = 1
+
+[default_session]
+command = "tuigreet --time --remember --user-menu 
+          --sessions /usr/share/wayland-sessions:/usr/share/xsessions 
+          --cmd 'Hyprland >/dev/null 2>&1'"
+user = "greeter"
+
+Features:
+  ✓ Shows time
+  ✓ Remembers last user
+  ✓ User menu enabled
+  ✓ Session selection (Wayland & X11)
+  ✓ Hyprland as default
+  ✓ Silent output (>/dev/null 2>&1)
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+🎯 WHAT CHANGED IN install.sh
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Before:
+  • Auto-generated basic greetd config
+  • Minimal tuigreet options
+
+After:
+  • Copies your greetd/config.toml
+  • Full tuigreet configuration
+  • Your customizations preserved
+  • Fallback to basic config if file missing
+
+New logic:
+  if [ -f "$SCRIPT_DIR/greetd/config.toml" ]; then
+      sudo cp "$SCRIPT_DIR/greetd/config.toml" /etc/greetd/config.toml
+  else
+      # Create basic fallback
+  fi
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+✨ BENEFITS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+✓ Uses YOUR greetd config
+✓ Enhanced tuigreet features (time, remember, user-menu)
+✓ Session selector configured
+✓ Clean Hyprland output
+✓ Customizable via source file
+✓ Fallback if config missing
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📂 COMPLETE PROJECT STRUCTURE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Peitharchy/
+├── hyprland/           (11 config files)
+├── gtk-3.0/            (3 files)
+├── gtk-4.0/            (2 files)
+├── scripts/            (4 executable scripts)
+├── rofi/               (config.rasi)
+├── greetd/             (config.toml)          ← NEW!
+├── wallpapers/         (3 images)
+└── install.sh          (main script)
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+🎯 INSTALLATION TARGET
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Your config gets copied to:
+  /etc/greetd/config.toml
+
+This is the system-wide greetd configuration location.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+🔍 VERIFICATION
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+After installation, check:
+
+  sudo cat /etc/greetd/config.toml
+
+You should see your tuigreet options:
+  • --time
+  • --remember
+  • --user-menu
+  • --sessions paths
+  • Hyprland command with silent output
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+✅ STATUS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+✓ greetd folder included in project
+✓ install.sh updated to copy config
+✓ Fallback logic added
+✓ Script syntax validated
+✓ Documentation updated
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+🎨 TUIGREET FEATURES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+With your config, users get:
+
+🕐 Time Display
+  Shows current time on login screen
+
+💾 Remember Last User
+  Auto-fills last logged-in user
+
+👤 User Menu
+  Select from available users
+
+🖥️ Session Selector
+  Choose between Wayland and X11 sessions
+
+🚀 Hyprland Default
+  Launches Hyprland with clean output
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📊 CONSISTENCY MAINTAINED
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Just like GTK configs, greetd config is now:
+  ✓ Provided by you
+  ✓ Copied (not generated)
+  ✓ Customizable at source
+  ✓ Fallback if missing
+
+Same pattern:
+  • GTK configs → Only your files used
+  • Greetd config → Only your file used
+  • Clean, predictable, maintainable
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+╔══════════════════════════════════════════════════════════════════╗
+║                                                                  ║
+║      ✨ COMPLETE LOGIN EXPERIENCE CONFIGURED! ✨                ║
+║                                                                  ║
+║  Your greetd config → Enhanced tuigreet features → Hyprland     ║
+║                                                                  ║
+╚══════════════════════════════════════════════════════════════════╝

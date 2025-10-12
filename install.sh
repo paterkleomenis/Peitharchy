@@ -240,8 +240,14 @@ sudo systemctl enable greetd
 
 # Configure tuigreet
 print_step "Configuring tuigreet..."
-sudo mkdir -p /etc/greetd
-sudo tee /etc/greetd/config.toml > /dev/null <<EOF
+if [ -f "$SCRIPT_DIR/greetd/config.toml" ]; then
+    sudo mkdir -p /etc/greetd
+    sudo cp "$SCRIPT_DIR/greetd/config.toml" /etc/greetd/config.toml
+    print_step "Greetd config copied from provided file!"
+else
+    print_warning "greetd/config.toml not found. Creating default config..."
+    sudo mkdir -p /etc/greetd
+    sudo tee /etc/greetd/config.toml > /dev/null <<EOF
 [terminal]
 vt = 1
 
@@ -249,6 +255,7 @@ vt = 1
 command = "tuigreet --cmd Hyprland"
 user = "greeter"
 EOF
+fi
 
 # Disable other display managers if they exist
 for dm in gdm sddm lightdm lxdm; do

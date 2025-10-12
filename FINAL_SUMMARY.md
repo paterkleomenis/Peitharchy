@@ -144,7 +144,11 @@ Peitharchy/
 │
 ├── 🎯 Rofi Config
 │   └── rofi/
-│       └── config.rasi         (Kora icons configured)
+├── 🎯 rofi/                 Application launcher
+│   └── config.rasi         (Kora icons configured)
+│
+├── 🔐 greetd/               Login manager config
+│   └── config.toml         (tuigreet configuration)
 │
 └── 🖼️ Wallpapers (3 files)
     └── wallpapers/
@@ -177,8 +181,9 @@ Peitharchy/
 14. ✅ Sets Kora icons via gsettings
 15. ✅ Sets Inter font via gsettings
 16. ✅ Configures environment variables
-17. ✅ Enables greetd login manager
-18. ✅ Adds user to necessary groups
+17. ✅ Copies greetd config (or creates default)
+18. ✅ Enables greetd login manager
+19. ✅ Adds user to necessary groups
 
 ### Auto-Updated Files:
 - `hyprpaper.conf` - `$HOME` → your actual home directory
