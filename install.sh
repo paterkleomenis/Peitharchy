@@ -179,7 +179,7 @@ else
     print_warning "Wallpapers directory not found. Skipping wallpapers."
 fi
 
-# Copy GTK configuration files
+# Copy GTK configuration files (ONLY use provided configs)
 print_step "Copying GTK configuration files..."
 
 # Copy GTK 3.0 configs
@@ -193,25 +193,8 @@ if [ -d "$SCRIPT_DIR/gtk-3.0" ]; then
 
     print_step "GTK 3.0 configs copied!"
 else
-    print_warning "gtk-3.0 directory not found. Creating default dark theme config..."
-    cat > ~/.config/gtk-3.0/settings.ini <<EOF
-[Settings]
-gtk-application-prefer-dark-theme=1
-gtk-theme-name=Adwaita-dark
-gtk-icon-theme-name=kora
-gtk-font-name=Inter 10
-gtk-cursor-theme-name=breeze_cursors
-gtk-cursor-theme-size=24
-gtk-enable-animations=true
-gtk-button-images=true
-gtk-menu-images=true
-gtk-enable-event-sounds=1
-gtk-enable-input-feedback-sounds=0
-gtk-xft-antialias=1
-gtk-xft-hinting=1
-gtk-xft-hintstyle=hintfull
-gtk-xft-rgba=rgb
-EOF
+    print_error "gtk-3.0 directory not found! Cannot continue."
+    exit 1
 fi
 
 # Copy GTK 4.0 configs
@@ -219,34 +202,18 @@ if [ -d "$SCRIPT_DIR/gtk-4.0" ]; then
     cp -r "$SCRIPT_DIR/gtk-4.0"/* ~/.config/gtk-4.0/
     print_step "GTK 4.0 configs copied!"
 else
-    print_warning "gtk-4.0 directory not found. Creating default dark theme config..."
-    cat > ~/.config/gtk-4.0/settings.ini <<EOF
-[Settings]
-gtk-application-prefer-dark-theme=1
-gtk-icon-theme-name=kora
-gtk-font-name=Inter 10
-gtk-cursor-theme-name=breeze_cursors
-gtk-cursor-theme-size=24
-gtk-enable-animations=true
-EOF
+    print_error "gtk-4.0 directory not found! Cannot continue."
+    exit 1
 fi
-
-# Create .gtkrc-2.0 for older GTK2 apps
-print_step "Creating GTK2 config..."
-cat > ~/.gtkrc-2.0 <<EOF
-gtk-theme-name="Adwaita-dark"
-gtk-icon-theme-name="kora"
-gtk-font-name="Inter 10"
-gtk-cursor-theme-name="breeze_cursors"
-gtk-cursor-theme-size=24
-EOF
 
 print_step "GTK theme configured (dark mode with Kora icons)!"
 
-# Set GNOME/GTK dark mode preference
-print_step "Setting GNOME color scheme to dark mode..."
+# Set GNOME/GTK preferences via gsettings
+print_step "Applying GNOME/GTK settings..."
 gsettings set org.gnome.desktop.interface color-scheme "prefer-dark"
-print_step "GNOME dark mode enabled!"
+gsettings set org.gnome.desktop.interface icon-theme "kora"
+gsettings set org.gnome.desktop.interface cursor-theme "breeze_cursors"
+print_step "GNOME dark mode and Kora icons enabled!"
 
 # Set environment variables for Hyprland
 print_step "Configuring environment variables..."

@@ -2,20 +2,24 @@
 
 ## What It Does
 
-The installation script automatically sets the GNOME/GTK color scheme preference to dark mode using:
+The installation script automatically sets the GNOME/GTK preferences for dark mode, icons, and cursor using:
 
 ```bash
 gsettings set org.gnome.desktop.interface color-scheme "prefer-dark"
+gsettings set org.gnome.desktop.interface icon-theme "kora"
+gsettings set org.gnome.desktop.interface cursor-theme "breeze_cursors"
 ```
 
 ## Why This Is Important
 
-This setting ensures that:
+These settings ensure that:
 
 1. **GTK4/libadwaita apps** respect dark mode
 2. **Modern GNOME applications** use dark theme
-3. **Applications that support dark mode detection** automatically switch
-4. **System-wide consistency** for GTK applications
+3. **Kora icons** are applied system-wide
+4. **Breeze cursors** are used everywhere
+5. **Applications that support dark mode detection** automatically switch
+6. **System-wide consistency** for GTK applications
 
 ## Applications Affected
 
@@ -27,13 +31,21 @@ This setting ensures that:
 
 ## Verification
 
-Check if dark mode is enabled:
+Check if settings are applied:
 
 ```bash
+# Check dark mode
 gsettings get org.gnome.desktop.interface color-scheme
-```
+# Expected: 'prefer-dark'
 
-**Expected output**: `'prefer-dark'`
+# Check icon theme
+gsettings get org.gnome.desktop.interface icon-theme
+# Expected: 'kora'
+
+# Check cursor theme
+gsettings get org.gnome.desktop.interface cursor-theme
+# Expected: 'breeze_cursors'
+```
 
 ## Manual Control
 
@@ -55,6 +67,18 @@ gsettings set org.gnome.desktop.interface color-scheme "prefer-light"
 gsettings set org.gnome.desktop.interface color-scheme "default"
 ```
 
+### Change Icon Theme
+
+```bash
+gsettings set org.gnome.desktop.interface icon-theme "your-icon-theme"
+```
+
+### Change Cursor Theme
+
+```bash
+gsettings set org.gnome.desktop.interface cursor-theme "your-cursor-theme"
+```
+
 ## Difference from GTK_THEME
 
 This is **different** from the `GTK_THEME` environment variable:
@@ -71,9 +95,11 @@ The installation script sets **all three** for maximum compatibility!
 
 The script applies dark mode through multiple methods:
 
-1. **gsettings** (this command)
+1. **gsettings** (these commands)
    ```bash
    gsettings set org.gnome.desktop.interface color-scheme "prefer-dark"
+   gsettings set org.gnome.desktop.interface icon-theme "kora"
+   gsettings set org.gnome.desktop.interface cursor-theme "breeze_cursors"
    ```
 
 2. **GTK3 settings.ini**
@@ -99,14 +125,17 @@ The script applies dark mode through multiple methods:
 
 ### Apps not respecting dark mode
 
-1. **Check the setting:**
+1. **Check the settings:**
    ```bash
    gsettings get org.gnome.desktop.interface color-scheme
+   gsettings get org.gnome.desktop.interface icon-theme
    ```
 
 2. **Re-apply if needed:**
    ```bash
    gsettings set org.gnome.desktop.interface color-scheme "prefer-dark"
+   gsettings set org.gnome.desktop.interface icon-theme "kora"
+   gsettings set org.gnome.desktop.interface cursor-theme "breeze_cursors"
    ```
 
 3. **Restart the application** - Some apps need restart to pick up changes
@@ -117,6 +146,8 @@ The script applies dark mode through multiple methods:
 
 ```bash
 gsettings reset org.gnome.desktop.interface color-scheme
+gsettings reset org.gnome.desktop.interface icon-theme
+gsettings reset org.gnome.desktop.interface cursor-theme
 ```
 
 ### List all GNOME interface settings
@@ -145,23 +176,17 @@ gsettings list-keys org.gnome.desktop.interface
 
 ## Additional Settings
 
-Other useful GNOME dark mode settings:
+Other useful GNOME settings you can set manually if needed:
 
 ```bash
-# Icon theme
-gsettings set org.gnome.desktop.interface icon-theme "kora"
-
-# Cursor theme
-gsettings set org.gnome.desktop.interface cursor-theme "breeze_cursors"
-
-# GTK theme
+# GTK theme (optional - already handled by GTK configs)
 gsettings set org.gnome.desktop.interface gtk-theme "Adwaita-dark"
 
-# Font
+# Font (optional - already handled by GTK configs)
 gsettings set org.gnome.desktop.interface font-name "Inter 10"
 ```
 
-These are NOT set by the script (handled by GTK configs instead), but you can use them if needed.
+**Note**: The installation script sets `color-scheme`, `icon-theme`, and `cursor-theme` via gsettings. Other settings are handled by the GTK configuration files.
 
 ## Integration with Hyprland
 
@@ -177,11 +202,13 @@ All GTK apps will already be in dark mode!
 
 ✅ **Set automatically** during installation
 ✅ **System-wide dark mode** for GTK/GNOME apps
+✅ **Kora icons applied** system-wide
+✅ **Breeze cursors configured** everywhere
 ✅ **Works with** GTK theme settings and colors.css
 ✅ **No manual configuration** required
 ✅ **Persistent** across reboots and logins
 
-**Result**: Complete dark mode coverage! 🌙
+**Result**: Complete dark mode coverage with beautiful icons! 🌙✨
 
 ---
 
