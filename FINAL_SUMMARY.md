@@ -170,12 +170,14 @@ Peitharchy/
 7. ✅ Copies Hyprland configs (with username replacement)
 8. ✅ Copies Waybar configs + scripts (dual locations)
 9. ✅ Copies Rofi config
-10. ✅ Copies GTK configs (GTK2/3/4)
+10. ✅ Copies GTK configs (GTK3/4)
 11. ✅ Copies wallpapers (with username replacement)
-12. ✅ Sets GNOME color scheme to prefer-dark
-13. ✅ Configures environment variables
-14. ✅ Enables greetd login manager
-15. ✅ Adds user to necessary groups
+12. ✅ Creates user directories (Downloads, Documents)
+13. ✅ Sets GNOME color scheme to prefer-dark
+14. ✅ Sets Kora icons via gsettings
+15. ✅ Configures environment variables
+16. ✅ Enables greetd login manager
+17. ✅ Adds user to necessary groups
 
 ### Auto-Updated Files:
 - `hyprpaper.conf` - `$HOME` → your actual home directory
@@ -219,10 +221,11 @@ Peitharchy/
 ~/.config/rofi/              → Rofi config
 ~/.config/gtk-3.0/           → GTK3 dark theme + colors.css
 ~/.config/gtk-4.0/           → GTK4 dark theme + colors.css
-~/.gtkrc-2.0                 → GTK2 dark theme
 ~/.local/bin/                → Scripts (system-wide)
 ~/.local/share/icons/        → Kora icons
 ~/Pictures/wallpapers/       → 3 wallpapers
+~/Downloads/                 → User downloads directory
+~/Documents/                 → User documents directory
 ```
 
 ---

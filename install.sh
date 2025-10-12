@@ -119,6 +119,8 @@ mkdir -p ~/.config/gtk-3.0
 mkdir -p ~/.config/gtk-4.0
 mkdir -p ~/.local/bin
 mkdir -p ~/Pictures/wallpapers
+mkdir -p ~/Downloads
+mkdir -p ~/Documents
 
 # Copy Hyprland configuration files
 print_step "Copying Hyprland configuration files..."
