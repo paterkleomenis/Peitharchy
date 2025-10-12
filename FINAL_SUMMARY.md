@@ -175,9 +175,10 @@ Peitharchy/
 12. ✅ Creates user directories (Downloads, Documents)
 13. ✅ Sets GNOME color scheme to prefer-dark
 14. ✅ Sets Kora icons via gsettings
-15. ✅ Configures environment variables
-16. ✅ Enables greetd login manager
-17. ✅ Adds user to necessary groups
+15. ✅ Sets Inter font via gsettings
+16. ✅ Configures environment variables
+17. ✅ Enables greetd login manager
+18. ✅ Adds user to necessary groups
 
 ### Auto-Updated Files:
 - `hyprpaper.conf` - `$HOME` → your actual home directory
@@ -201,6 +202,7 @@ Peitharchy/
 ### Icons & Cursors:
 - **Icons**: Kora (dark variants)
 - **Cursor**: Breeze (24px)
+- **Font**: Inter 10
 
 ### Applied To:
 - ✅ GTK2 (legacy apps)
@@ -287,7 +289,7 @@ SUPER + Q  →  Close window
 - Waybar scripts work immediately
 - Rofi with Kora icons
 - All keybindings ready
-- GNOME color scheme set to prefer-dark
+- GNOME color scheme, icons, cursor, and font set via gsettings
 
 ✅ **Professional Documentation**
 - 9 markdown files
@@ -307,6 +309,7 @@ Your installation script is **complete and tested**. Just run:
 Then reboot and enjoy your beautiful Hyprland setup with:
 - ✨ Dark theme everywhere
 - 🎨 Kora icons
+- 🔤 Inter font system-wide
 - 🚀 Both terminals (kitty + ghostty)
 - 📜 All scripts working
 - 🖼️ Wallpapers configured

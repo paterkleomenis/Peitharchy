@@ -215,7 +215,8 @@ print_step "Applying GNOME/GTK settings..."
 gsettings set org.gnome.desktop.interface color-scheme "prefer-dark"
 gsettings set org.gnome.desktop.interface icon-theme "kora"
 gsettings set org.gnome.desktop.interface cursor-theme "breeze_cursors"
-print_step "GNOME dark mode and Kora icons enabled!"
+gsettings set org.gnome.desktop.interface font-name "Inter 10"
+print_step "GNOME dark mode, Kora icons, and Inter font enabled!"
 
 # Set environment variables for Hyprland
 print_step "Configuring environment variables..."

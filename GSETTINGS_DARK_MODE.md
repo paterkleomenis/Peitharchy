@@ -2,12 +2,13 @@
 
 ## What It Does
 
-The installation script automatically sets the GNOME/GTK preferences for dark mode, icons, and cursor using:
+The installation script automatically sets the GNOME/GTK preferences for dark mode, icons, cursor, and font using:
 
 ```bash
 gsettings set org.gnome.desktop.interface color-scheme "prefer-dark"
 gsettings set org.gnome.desktop.interface icon-theme "kora"
 gsettings set org.gnome.desktop.interface cursor-theme "breeze_cursors"
+gsettings set org.gnome.desktop.interface font-name "Inter 10"
 ```
 
 ## Why This Is Important
@@ -18,8 +19,9 @@ These settings ensure that:
 2. **Modern GNOME applications** use dark theme
 3. **Kora icons** are applied system-wide
 4. **Breeze cursors** are used everywhere
-5. **Applications that support dark mode detection** automatically switch
-6. **System-wide consistency** for GTK applications
+5. **Inter font** is used for all UI text
+6. **Applications that support dark mode detection** automatically switch
+7. **System-wide consistency** for GTK applications
 
 ## Applications Affected
 
@@ -45,6 +47,10 @@ gsettings get org.gnome.desktop.interface icon-theme
 # Check cursor theme
 gsettings get org.gnome.desktop.interface cursor-theme
 # Expected: 'breeze_cursors'
+
+# Check font
+gsettings get org.gnome.desktop.interface font-name
+# Expected: 'Inter 10'
 ```
 
 ## Manual Control
@@ -79,6 +85,12 @@ gsettings set org.gnome.desktop.interface icon-theme "your-icon-theme"
 gsettings set org.gnome.desktop.interface cursor-theme "your-cursor-theme"
 ```
 
+### Change Font
+
+```bash
+gsettings set org.gnome.desktop.interface font-name "Your Font 10"
+```
+
 ## Difference from GTK_THEME
 
 This is **different** from the `GTK_THEME` environment variable:
@@ -86,10 +98,13 @@ This is **different** from the `GTK_THEME` environment variable:
 | Setting | What It Does |
 |---------|--------------|
 | `gsettings color-scheme` | Tells apps to prefer dark/light variants |
+| `gsettings icon-theme` | Sets the icon theme system-wide |
+| `gsettings cursor-theme` | Sets the cursor theme system-wide |
+| `gsettings font-name` | Sets the UI font system-wide |
 | `GTK_THEME` | Forces a specific theme (e.g., "Adwaita-dark") |
 | `gtk-application-prefer-dark-theme` | GTK3 setting in settings.ini |
 
-The installation script sets **all three** for maximum compatibility!
+The installation script sets **all of these** for maximum compatibility!
 
 ## Combined Dark Mode Setup
 
@@ -100,6 +115,7 @@ The script applies dark mode through multiple methods:
    gsettings set org.gnome.desktop.interface color-scheme "prefer-dark"
    gsettings set org.gnome.desktop.interface icon-theme "kora"
    gsettings set org.gnome.desktop.interface cursor-theme "breeze_cursors"
+   gsettings set org.gnome.desktop.interface font-name "Inter 10"
    ```
 
 2. **GTK3 settings.ini**
@@ -129,6 +145,7 @@ The script applies dark mode through multiple methods:
    ```bash
    gsettings get org.gnome.desktop.interface color-scheme
    gsettings get org.gnome.desktop.interface icon-theme
+   gsettings get org.gnome.desktop.interface font-name
    ```
 
 2. **Re-apply if needed:**
@@ -136,6 +153,7 @@ The script applies dark mode through multiple methods:
    gsettings set org.gnome.desktop.interface color-scheme "prefer-dark"
    gsettings set org.gnome.desktop.interface icon-theme "kora"
    gsettings set org.gnome.desktop.interface cursor-theme "breeze_cursors"
+   gsettings set org.gnome.desktop.interface font-name "Inter 10"
    ```
 
 3. **Restart the application** - Some apps need restart to pick up changes
@@ -148,6 +166,7 @@ The script applies dark mode through multiple methods:
 gsettings reset org.gnome.desktop.interface color-scheme
 gsettings reset org.gnome.desktop.interface icon-theme
 gsettings reset org.gnome.desktop.interface cursor-theme
+gsettings reset org.gnome.desktop.interface font-name
 ```
 
 ### List all GNOME interface settings
@@ -181,12 +200,9 @@ Other useful GNOME settings you can set manually if needed:
 ```bash
 # GTK theme (optional - already handled by GTK configs)
 gsettings set org.gnome.desktop.interface gtk-theme "Adwaita-dark"
-
-# Font (optional - already handled by GTK configs)
-gsettings set org.gnome.desktop.interface font-name "Inter 10"
 ```
 
-**Note**: The installation script sets `color-scheme`, `icon-theme`, and `cursor-theme` via gsettings. Other settings are handled by the GTK configuration files.
+**Note**: The installation script sets `color-scheme`, `icon-theme`, `cursor-theme`, and `font-name` via gsettings. The GTK theme is handled by the GTK configuration files.
 
 ## Integration with Hyprland
 
@@ -204,11 +220,12 @@ All GTK apps will already be in dark mode!
 ✅ **System-wide dark mode** for GTK/GNOME apps
 ✅ **Kora icons applied** system-wide
 ✅ **Breeze cursors configured** everywhere
+✅ **Inter font set** for all UI text
 ✅ **Works with** GTK theme settings and colors.css
 ✅ **No manual configuration** required
 ✅ **Persistent** across reboots and logins
 
-**Result**: Complete dark mode coverage with beautiful icons! 🌙✨
+**Result**: Complete dark mode coverage with beautiful icons and Inter font! 🌙✨
 
 ---
 
