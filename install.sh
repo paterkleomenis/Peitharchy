@@ -166,21 +166,52 @@ fi
 print_step "Main packages installed successfully!"
 
 # Install paru (AUR helper) if not already installed
-if ! command -v paru &> /dev/null; then
-    print_step "Installing paru (AUR helper)..."
-    cd /tmp
-    git clone https://aur.archlinux.org/paru.git
-    cd paru
-    makepkg -si --noconfirm
-    cd "$SCRIPT_DIR"
-    print_step "Paru installed successfully!"
+print_step "Checking AUR availability..."
+if ping -c 1 aur.archlinux.org &> /dev/null; then
+    print_info "AUR is accessible"
+    AUR_AVAILABLE=true
 else
-    print_info "Paru is already installed"
+    print_warning "Cannot reach AUR (aur.archlinux.org)"
+    print_warning "AUR packages will be skipped"
+    AUR_AVAILABLE=false
 fi
 
-# Install AUR packages
-print_step "Installing AUR packages..."
-paru -S --needed --noconfirm xcursor-breeze ghostty
+if [ "$AUR_AVAILABLE" = true ]; then
+    if ! command -v paru &> /dev/null; then
+        print_step "Installing paru (AUR helper)..."
+        cd /tmp
+        if git clone https://aur.archlinux.org/paru.git 2>/dev/null; then
+            cd paru
+            makepkg -si --noconfirm
+            cd "$SCRIPT_DIR"
+            print_step "Paru installed successfully!"
+        else
+            print_error "Failed to clone paru from AUR"
+            AUR_AVAILABLE=false
+        fi
+    else
+        print_info "Paru is already installed"
+    fi
+fi
+
+# Install AUR packages (optional)
+if [ "$AUR_AVAILABLE" = true ]; then
+    print_step "Installing AUR packages..."
+
+    # Try to install AUR packages
+    if paru -S --needed --noconfirm xcursor-breeze ghostty 2>/dev/null; then
+        print_step "AUR packages installed successfully!"
+    else
+        print_warning "Failed to install some AUR packages"
+        print_info "You can install them manually later with: paru -S xcursor-breeze ghostty"
+    fi
+else
+    print_warning "Skipping AUR packages (AUR unavailable)"
+    print_info "Alternative cursor themes available in official repos:"
+    echo "  - sudo pacman -S xcursor-themes"
+    echo "  - Or use system default cursor"
+    print_info "Ghostty terminal skipped - kitty will be your default terminal"
+fi
 
 # Install Flatpak
 print_step "Installing Flatpak..."

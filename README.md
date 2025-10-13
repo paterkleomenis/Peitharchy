@@ -82,10 +82,12 @@ Peitharchy is a complete Hyprland desktop environment setup featuring:
 - gtk3, gtk4, nwg-look, gnome-themes-extra, dconf
 - flatpak
 
-#### AUR (via paru)
+#### AUR (via paru) - Optional
 - paru (AUR helper)
-- xcursor-breeze
-- ghostty
+- xcursor-breeze (cursor theme - falls back to system default if unavailable)
+- ghostty (terminal - kitty is used if unavailable)
+
+**Note:** If AUR is unavailable, the installation will continue without these packages.
 
 #### Flatpak
 - MissionCenter (system monitor)
@@ -229,6 +231,36 @@ To remove Peitharchy and restore your system:
 This will remove all Peitharchy configurations. Backups created during installation will remain in your home directory.
 
 ## Troubleshooting
+
+### AUR Unavailable
+If you see "Cannot reach AUR (aur.archlinux.org)":
+
+**This is OK** - the installation will continue without AUR packages. You'll still get:
+- All Hyprland components
+- Waybar and all utilities
+- Kitty terminal (default)
+- System default cursor
+
+**To install AUR packages later:**
+```bash
+# Install paru
+cd /tmp
+git clone https://aur.archlinux.org/paru.git
+cd paru
+makepkg -si
+
+# Install optional packages
+paru -S xcursor-breeze ghostty
+```
+
+**Alternative solutions:**
+- Wait and try again later (AUR sometimes has temporary issues)
+- Use VPN or different network
+- Install alternative packages from official repos:
+  ```bash
+  sudo pacman -S xcursor-themes  # Alternative cursors
+  # Use kitty or alacritty instead of ghostty
+  ```
 
 ### Mirror/Package Installation Issues
 If you encounter errors like "failed retrieving file" or "The requested URL returned error: 503":
