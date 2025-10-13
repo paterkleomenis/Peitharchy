@@ -94,13 +94,43 @@ check_dependencies
 # Backup existing configs
 backup_existing_configs
 
-# Update system
+# Refresh mirror list and update system
+print_step "Refreshing package databases..."
+print_info "If you encounter mirror errors, you may need to update your mirrorlist"
+print_info "Run: sudo pacman -Sy archlinux-keyring && sudo pacman -Syu"
+
+# Try to update system, with better error handling
 print_step "Updating system..."
-sudo pacman -Syu --noconfirm
+if ! sudo pacman -Sy --noconfirm; then
+    print_warning "Failed to sync package databases"
+    print_info "Trying to refresh keyrings..."
+    sudo pacman -Sy --noconfirm archlinux-keyring || true
+fi
+
+if ! sudo pacman -Su --noconfirm; then
+    print_error "Failed to update system packages"
+    print_info "This might be due to:"
+    echo "  1. Mirror connectivity issues"
+    echo "  2. Outdated keyring"
+    echo "  3. Network problems"
+    echo ""
+    print_info "Try these fixes:"
+    echo "  1. Update mirrors: sudo reflector --latest 20 --protocol https --sort rate --save /etc/pacman.d/mirrorlist"
+    echo "  2. Update keyring: sudo pacman -Sy archlinux-keyring"
+    echo "  3. Check network: ping -c 3 archlinux.org"
+    echo ""
+    read -p "Do you want to continue anyway? (y/N): " -r
+    if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+        print_error "Installation aborted"
+        exit 1
+    fi
+fi
 
 # Install main packages
 print_step "Installing main packages..."
-sudo pacman -S --needed --noconfirm \
+print_info "This may take a while depending on your connection..."
+
+if ! sudo pacman -S --needed --noconfirm \
   hyprland hyprpaper hypridle hyprlock hyprshot hyprsunset \
   waybar rofi cliphist wl-clipboard libnotify \
   polkit-gnome xdg-desktop-portal-hyprland xdg-desktop-portal-gtk swaync \
@@ -115,7 +145,23 @@ sudo pacman -S --needed --noconfirm \
   ttf-jetbrains-mono-nerd inter-font \
   noto-fonts noto-fonts-cjk noto-fonts-emoji \
   gnome-system-monitor baobab pipewire pipewire-alsa pipewire-pulse pipewire-jack \
-  kitty gtk3 gtk4 nwg-look gnome-themes-extra dconf
+  kitty gtk3 gtk4 nwg-look gnome-themes-extra dconf; then
+    print_error "Failed to install some packages"
+    print_warning "Common causes:"
+    echo "  - Mirror is down or slow"
+    echo "  - Package signing issues"
+    echo "  - Network connectivity problems"
+    echo ""
+    print_info "You can try:"
+    echo "  1. Run the script again"
+    echo "  2. Manually install failed packages"
+    echo "  3. Update mirrors with reflector"
+    echo ""
+    read -p "Continue with installation? (y/N): " -r
+    if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+        exit 1
+    fi
+fi
 
 print_step "Main packages installed successfully!"
 

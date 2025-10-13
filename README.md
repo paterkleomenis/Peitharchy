@@ -98,12 +98,18 @@ git clone <repository-url>
 cd Peitharchy
 ```
 
-2. Make the installation script executable:
+2. (Optional) If you have mirror issues, fix them first:
+```bash
+chmod +x fix-mirrors.sh
+./fix-mirrors.sh
+```
+
+3. Make the installation script executable:
 ```bash
 chmod +x install.sh
 ```
 
-3. Run the installation script:
+4. Run the installation script:
 ```bash
 ./install.sh
 ```
@@ -223,6 +229,36 @@ To remove Peitharchy and restore your system:
 This will remove all Peitharchy configurations. Backups created during installation will remain in your home directory.
 
 ## Troubleshooting
+
+### Mirror/Package Installation Issues
+If you encounter errors like "failed retrieving file" or "The requested URL returned error: 503":
+
+**Quick Fix:**
+```bash
+./fix-mirrors.sh
+```
+
+This script will:
+- Update your Arch Linux keyring
+- Install and configure reflector
+- Backup your current mirrorlist
+- Select the fastest mirrors for your region
+- Test package installation
+
+**Manual Fix:**
+```bash
+# Update keyring
+sudo pacman -Sy archlinux-keyring
+
+# Install reflector
+sudo pacman -S reflector
+
+# Update mirrors (choose fastest 20 worldwide)
+sudo reflector --latest 20 --protocol https --sort rate --save /etc/pacman.d/mirrorlist
+
+# Sync databases
+sudo pacman -Syy
+```
 
 ### Waybar not appearing
 ```bash
