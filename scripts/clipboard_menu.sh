@@ -1,4 +1,5 @@
-# ~/.config/waybar/scripts/clipboard_menu.sh
+#!/usr/bin/env bash
+# ~/.local/bin/clipboard_menu.sh
 sel="$(cliphist list | rofi -dmenu -i -p '📋 Clipboard')"
 [ -z "$sel" ] && exit 0
 id="${sel%% *}"

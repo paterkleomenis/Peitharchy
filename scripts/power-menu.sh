@@ -47,4 +47,3 @@ case $chosen in
         systemctl suspend
         ;;
 esac
- -f -c 000000

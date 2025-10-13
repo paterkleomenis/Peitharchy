@@ -29,6 +29,51 @@ print_info() {
     echo -e "${BLUE}Info:${NC} $1"
 }
 
+# Check for required dependencies
+check_dependencies() {
+    print_step "Checking for required dependencies..."
+    local missing=()
+    for cmd in git tar jq wget; do
+        command -v "$cmd" &>/dev/null || missing+=("$cmd")
+    done
+
+    if [ ${#missing[@]} -gt 0 ]; then
+        print_error "Missing required dependencies: ${missing[*]}"
+        print_info "Install them with: sudo pacman -S ${missing[*]}"
+        exit 1
+    fi
+    print_step "All required dependencies found!"
+}
+
+# Backup existing configurations
+backup_existing_configs() {
+    local backup_dir="$HOME/.config-backup-$(date +%Y%m%d-%H%M%S)"
+    local needs_backup=false
+
+    # Check if any configs exist
+    for dir in ~/.config/hypr ~/.config/waybar ~/.config/rofi ~/.config/gtk-3.0 ~/.config/gtk-4.0; do
+        if [ -d "$dir" ]; then
+            needs_backup=true
+            break
+        fi
+    done
+
+    if [ "$needs_backup" = true ]; then
+        print_step "Backing up existing configurations to $backup_dir..."
+        mkdir -p "$backup_dir"
+
+        [ -d ~/.config/hypr ] && cp -r ~/.config/hypr "$backup_dir/"
+        [ -d ~/.config/waybar ] && cp -r ~/.config/waybar "$backup_dir/"
+        [ -d ~/.config/rofi ] && cp -r ~/.config/rofi "$backup_dir/"
+        [ -d ~/.config/gtk-3.0 ] && cp -r ~/.config/gtk-3.0 "$backup_dir/"
+        [ -d ~/.config/gtk-4.0 ] && cp -r ~/.config/gtk-4.0 "$backup_dir/"
+
+        print_info "Backup created at: $backup_dir"
+    else
+        print_info "No existing configurations found, skipping backup"
+    fi
+}
+
 # Check if running as root
 if [ "$EUID" -eq 0 ]; then
     print_error "Do not run this script as root. It will use sudo when needed."
@@ -40,6 +85,12 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 print_step "Starting Peitharchy installation..."
 echo ""
+
+# Check dependencies first
+check_dependencies
+
+# Backup existing configs
+backup_existing_configs
 
 # Update system
 print_step "Updating system..."
@@ -116,6 +167,7 @@ mkdir -p ~/.config/gtk-3.0
 mkdir -p ~/.config/gtk-4.0
 mkdir -p ~/.local/bin
 mkdir -p ~/Pictures/wallpapers
+mkdir -p ~/Pictures/Screenshots
 mkdir -p ~/Downloads
 mkdir -p ~/Documents
 
@@ -135,17 +187,14 @@ else
     print_warning "Hyprland directory not found. Skipping Hyprland configs."
 fi
 
-# Copy scripts
+# Copy scripts to ~/.local/bin only (no duplication)
 print_step "Copying scripts..."
 if [ -d "$SCRIPT_DIR/scripts" ]; then
     # Copy to ~/.local/bin
     cp -r "$SCRIPT_DIR/scripts"/* ~/.local/bin/
     chmod +x ~/.local/bin/*.sh
 
-    # Symlink to waybar scripts directory (avoid duplication)
-    ln -sf ~/.local/bin/*.sh ~/.config/waybar/scripts/
-
-    print_step "Scripts copied and made executable!"
+    print_step "Scripts copied to ~/.local/bin and made executable!"
 else
     print_warning "Scripts directory not found. Skipping scripts."
 fi
@@ -154,6 +203,10 @@ fi
 if [ -f "$SCRIPT_DIR/config" ]; then
     print_step "Copying Waybar config..."
     cp "$SCRIPT_DIR/config" ~/.config/waybar/config
+
+    # Update waybar config to use ~/.local/bin for scripts
+    sed -i 's|~/.config/waybar/scripts/|~/.local/bin/|g' ~/.config/waybar/config
+    print_info "Updated Waybar config to use ~/.local/bin for scripts"
 fi
 
 # Copy waybar style if it exists
@@ -264,7 +317,7 @@ echo "Configuration locations:"
 echo "  - Hyprland: ~/.config/hypr/"
 echo "  - Waybar: ~/.config/waybar/"
 echo "  - Rofi: ~/.config/rofi/"
-echo "  - Scripts: ~/.local/bin/ and ~/.config/waybar/scripts/"
+echo "  - Scripts: ~/.local/bin/"
 echo "  - Icons: ~/.local/share/icons/"
 echo "  - Wallpapers: ~/Pictures/wallpapers/"
 echo "  - GTK: ~/.config/gtk-3.0/ and ~/.config/gtk-4.0/"

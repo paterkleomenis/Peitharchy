@@ -1,0 +1,30 @@
+# Peitharchy .gitignore
+
+# Exclude the icon theme tarball (too large for git)
+kora-1-7-2.tar.xz
+
+# Exclude any local configuration overrides
+*.local
+
+# Exclude backup files
+*.backup
+*.bak
+*~
+
+# Exclude temporary files
+*.tmp
+*.swp
+*.swo
+.DS_Store
+
+# Exclude editor files
+.vscode/
+.idea/
+*.sublime-*
+
+# Exclude any personal notes
+notes.txt
+TODO.local
+
+# Exclude any generated files
+*.log

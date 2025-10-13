@@ -29,16 +29,16 @@
       "exec": "echo clipboard",
       "interval": 30,
       "tooltip-format": "Clipboard Manager",
-      "on-click": "~/.config/waybar/scripts/clipboard_menu.sh",
+      "on-click": "~/.local/bin/clipboard_menu.sh",
       "on-click-right": "cliphist wipe && notify-send 'Clipboard' 'History cleared'"
     },
     "custom/nightlight": {
     "return-type": "json",
-    "exec": "~/.config/waybar/scripts/hyprsunset.sh",
-    "on-click": "~/.config/waybar/scripts/hyprsunset.sh toggle",
-    "on-scroll-up": "~/.config/waybar/scripts/hyprsunset.sh warmer",
-    "on-scroll-down": "~/.config/waybar/scripts/hyprsunset.sh cooler",
-    "interval": 2,
+    "exec": "~/.local/bin/hyprsunset.sh",
+    "on-click": "~/.local/bin/hyprsunset.sh toggle",
+    "on-scroll-up": "~/.local/bin/hyprsunset.sh warmer",
+    "on-scroll-down": "~/.local/bin/hyprsunset.sh cooler",
+    "interval": 5,
     "tooltip": true
     },
     "hyprland/language": {
@@ -46,7 +46,7 @@
         "format-en": "EN",
         "format-gr": "ΕΛ",
         "tooltip-format": "Keyboard Layout: {}",
-        "on-click": "~/.config/waybar/scripts/toggle-layout.sh"
+        "on-click": "~/.local/bin/toggle-layout.sh"
     },
     "hyprland/workspaces": {
       "disable-scroll": true,
@@ -159,7 +159,7 @@
     },
     "custom/power": {
       "format": "󰐥",
-      "on-click": "~/.config/waybar/scripts/power-menu.sh",
+      "on-click": "~/.local/bin/power-menu.sh",
       "tooltip-format": "Power Menu"
     }
   }
