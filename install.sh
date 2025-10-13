@@ -33,7 +33,9 @@ print_info() {
 check_dependencies() {
     print_step "Checking for required dependencies..."
     local missing=()
-    for cmd in git tar jq wget; do
+    # Only check for tools needed by the install script itself
+    # (jq and wget will be installed by the script)
+    for cmd in git tar; do
         command -v "$cmd" &>/dev/null || missing+=("$cmd")
     done
 
