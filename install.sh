@@ -239,7 +239,6 @@ fi
 print_step "Creating configuration directories..."
 mkdir -p ~/.config/hypr
 mkdir -p ~/.config/waybar
-mkdir -p ~/.config/waybar/scripts
 mkdir -p ~/.config/rofi
 mkdir -p ~/.config/swaync
 mkdir -p ~/.config/gtk-3.0
