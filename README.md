@@ -1,6 +1,12 @@
+<div align="center">
+
+<img src="logonobackground.png" alt="Peitharchy Logo" width="400"/>
+
 # Peitharchy
 
 A modular Hyprland configuration for Arch Linux with custom Waybar, GTK theming, and productivity features.
+
+</div>
 
 ## Overview
 
