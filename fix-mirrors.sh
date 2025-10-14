@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # Peitharchy Mirror Fix Script
 # Fixes common pacman mirror and keyring issues

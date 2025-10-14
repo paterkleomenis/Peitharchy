@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # Peitharchy - Uninstallation Script
 # This script removes Peitharchy configurations and optionally removes installed packages

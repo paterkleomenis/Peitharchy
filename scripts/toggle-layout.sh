@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # Get the currently active keyboard (the main one)
 KEYBOARD=$(hyprctl devices -j | jq -r '.keyboards[] | select(.main == true) | .name')

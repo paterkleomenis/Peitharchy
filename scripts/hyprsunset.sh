@@ -41,7 +41,13 @@ apply_temp() {
 
 toggle() {
   if is_running; then
-    killall -9 hyprsunset 2>/dev/null || true
+    # Try graceful shutdown first (SIGTERM)
+    killall hyprsunset 2>/dev/null || true
+    sleep 0.2
+    # Force kill if still running (SIGKILL)
+    if is_running; then
+      killall -9 hyprsunset 2>/dev/null || true
+    fi
     hyprctl hyprsunset identity >/dev/null 2>&1 || true
   else
     apply_temp "$(read_temp)"

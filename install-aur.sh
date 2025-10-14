@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # Peitharchy AUR Package Installer
 # Install AUR packages separately if AUR was unavailable during main installation

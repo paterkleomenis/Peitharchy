@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # Peitharchy - Arch Linux Hyprland Setup Installation Script
 # This script installs all necessary packages, configurations, and the Kora icon theme

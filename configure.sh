@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # Peitharchy Configuration Wizard
 # Interactive script to customize your Hyprland setup
