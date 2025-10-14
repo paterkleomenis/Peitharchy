@@ -77,6 +77,7 @@ Peitharchy is a complete Hyprland desktop environment setup featuring:
 - pipewire, pipewire-alsa, pipewire-pulse, pipewire-jack
 - kdeconnect
 - kitty, neovim, nano
+- ark (archive manager), p7zip, unzip, tar
 - ttf-jetbrains-mono-nerd, inter-font
 - noto-fonts, noto-fonts-cjk, noto-fonts-emoji
 - gtk3, gtk4, nwg-look, gnome-themes-extra, dconf

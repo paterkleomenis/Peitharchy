@@ -141,7 +141,7 @@ if ! sudo pacman -S --needed --noconfirm \
   wireplumber pavucontrol alsa-utils \
   gst-plugins-good gst-plugins-bad gst-plugins-ugly \
   kdeconnect \
-  neovim nano curl wget unzip p7zip tar base-devel git \
+  neovim nano curl wget unzip p7zip tar base-devel git ark \
   ttf-jetbrains-mono-nerd inter-font \
   noto-fonts noto-fonts-cjk noto-fonts-emoji \
   gnome-system-monitor baobab pipewire pipewire-alsa pipewire-pulse pipewire-jack \
