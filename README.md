@@ -125,6 +125,7 @@ The script will:
 - Install Kora icon theme
 - Create necessary directories
 - Copy all configuration files to appropriate locations
+- Ask about GTK theme installation (keeps custom themes if you decline)
 - Configure GTK themes and settings
 - Set up greetd login manager
 - Add user to required groups
@@ -219,6 +220,8 @@ Edit `~/.config/hypr/appearance.conf` for blur, shadows, animations, gaps, and b
 - GTK 3.0: `~/.config/gtk-3.0/`
 - GTK 4.0: `~/.config/gtk-4.0/`
 - GUI tool: Run `nwg-look` for graphical theme selection
+
+**Note:** If you have custom GTK themes, the install script will ask before overwriting them. You can choose to keep your custom themes during installation.
 
 ## Uninstallation
 

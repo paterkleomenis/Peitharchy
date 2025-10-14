@@ -309,42 +309,64 @@ else
     print_warning "Wallpapers directory not found. Skipping wallpapers."
 fi
 
-# Copy GTK configuration files (ONLY use provided configs)
-print_step "Copying GTK configuration files..."
+# Copy GTK configuration files (Optional - ask user)
+echo ""
+print_info "GTK theme configuration:"
+print_warning "This will overwrite your current GTK 3.0/4.0 theme files"
 
-# Copy GTK 3.0 configs
-if [ -d "$SCRIPT_DIR/gtk-3.0" ]; then
-    cp -r "$SCRIPT_DIR/gtk-3.0"/* ~/.config/gtk-3.0/
+# Check if user has custom themes
+CUSTOM_GTK=false
+if [ -f ~/.config/gtk-3.0/gtk.gresource ] || [ -f ~/.config/gtk-4.0/gtk.gresource ]; then
+    print_info "Custom GTK theme detected!"
+    CUSTOM_GTK=true
+fi
 
-    # Update bookmarks with current user's home directory
-    if [ -f ~/.config/gtk-3.0/bookmarks ]; then
-        sed -i "s|\$HOME|$HOME|g" ~/.config/gtk-3.0/bookmarks
+if [ "$CUSTOM_GTK" = true ]; then
+    print_warning "You appear to have a custom GTK theme installed"
+    read -p "Do you want to replace it with Peitharchy GTK theme? (y/N): " -r
+    INSTALL_GTK=$REPLY
+else
+    read -p "Install Peitharchy GTK theme? (Y/n): " -r
+    INSTALL_GTK=${REPLY:-Y}
+fi
+
+if [[ $INSTALL_GTK =~ ^[Yy]$ ]]; then
+    print_step "Installing GTK configuration files..."
+
+    # Copy GTK 3.0 configs
+    if [ -d "$SCRIPT_DIR/gtk-3.0" ]; then
+        cp -r "$SCRIPT_DIR/gtk-3.0"/* ~/.config/gtk-3.0/
+
+        # Update bookmarks with current user's home directory
+        if [ -f ~/.config/gtk-3.0/bookmarks ]; then
+            sed -i "s|\$HOME|$HOME|g" ~/.config/gtk-3.0/bookmarks
+        fi
+
+        print_step "GTK 3.0 configs copied!"
+    else
+        print_warning "gtk-3.0 directory not found in source. Skipping."
     fi
 
-    print_step "GTK 3.0 configs copied!"
+    # Copy GTK 4.0 configs
+    if [ -d "$SCRIPT_DIR/gtk-4.0" ]; then
+        cp -r "$SCRIPT_DIR/gtk-4.0"/* ~/.config/gtk-4.0/
+        print_step "GTK 4.0 configs copied!"
+    else
+        print_warning "gtk-4.0 directory not found in source. Skipping."
+    fi
+
+    print_step "GTK theme configured!"
+
+    # Set GNOME/GTK preferences via gsettings
+    print_step "Applying GNOME/GTK settings..."
+    gsettings set org.gnome.desktop.interface icon-theme "kora" 2>/dev/null || true
+    gsettings set org.gnome.desktop.interface color-scheme "prefer-dark" 2>/dev/null || true
+    gsettings set org.gnome.desktop.interface font-name "Inter,  10" 2>/dev/null || true
+    print_step "GTK settings applied!"
 else
-    print_error "gtk-3.0 directory not found! Cannot continue."
-    exit 1
+    print_info "Skipping GTK theme installation - keeping your custom theme"
+    print_info "Your custom GTK theme will be preserved"
 fi
-
-# Copy GTK 4.0 configs
-if [ -d "$SCRIPT_DIR/gtk-4.0" ]; then
-    cp -r "$SCRIPT_DIR/gtk-4.0"/* ~/.config/gtk-4.0/
-    print_step "GTK 4.0 configs copied!"
-else
-    print_error "gtk-4.0 directory not found! Cannot continue."
-    exit 1
-fi
-
-print_step "GTK theme configured (dark mode with Kora icons)!"
-
-# Set GNOME/GTK preferences via gsettings
-print_step "Applying GNOME/GTK settings..."
-gsettings set org.gnome.desktop.interface gtk-theme "HighContrastInverse"
-gsettings set org.gnome.desktop.interface icon-theme "kora"
-gsettings set org.gnome.desktop.interface color-scheme "prefer-dark"
-gsettings set org.gnome.desktop.interface font-name "Inter,  10"
-print_step "GTK theme, icons, and font settings applied!"
 
 # Enable greetd service
 print_step "Enabling greetd service..."
