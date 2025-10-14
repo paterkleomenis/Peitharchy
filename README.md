@@ -212,6 +212,25 @@ Edit `~/.config/hypr/keybinds.conf`
 ### Adjusting Appearance
 Edit `~/.config/hypr/appearance.conf` for blur, shadows, animations, gaps, and borders
 
+### Window Rules Customization
+Peitharchy uses **percentage-based window sizing** to work across all screen resolutions (1080p, 1440p, 4K, etc.).
+
+Edit `~/.config/hypr/window-rules.conf` to customize floating window sizes and behavior.
+
+**Example: Make VS Code float at 80% size**
+```conf
+windowrulev2 = float, class:^(code)$
+windowrulev2 = size 80% 85%, class:^(code)$
+windowrulev2 = center, class:^(code)$
+```
+
+**Find app class names:**
+```bash
+hyprctl clients | grep class
+```
+
+See `WINDOW_RULES.md` for complete documentation on customizing window rules for different resolutions.
+
 ### Waybar Customization
 - Layout: `~/.config/waybar/config`
 - Styling: `~/.config/waybar/style.css`
@@ -330,6 +349,14 @@ Verify the screenshots directory exists:
 ```bash
 mkdir -p ~/Pictures/Screenshots
 ```
+
+## Documentation Files
+
+- `README.md` - Main documentation (this file)
+- `WINDOW_RULES.md` - Complete guide to window rules and multi-resolution support
+- `CUSTOM_THEMES.md` - Using custom GTK themes
+- `TROUBLESHOOTING.md` - Common issues and solutions
+- `DEPENDENCIES.md` - Package information
 
 ## Project Structure
 
