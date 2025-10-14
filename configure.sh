@@ -520,25 +520,14 @@ if [ "$configure_theme" = true ]; then
         print_info "Updated Hyprland border colors"
     fi
 
-    # Update GTK accent colors
-    for gtk_dir in ~/.config/gtk-3.0 ~/.config/gtk-4.0; do
-        if [ -f "$gtk_dir/colors.css" ]; then
-            # Update primary accent color
-            sed -i "s/@define-color accent_blue.*/@define-color accent_blue    $accent_color;/" "$gtk_dir/colors.css"
-            print_info "Updated $gtk_dir/colors.css"
-        fi
-    done
+    # Note: GTK accent colors are handled by the gtk.gresource files
+    # Manual editing of those would require recompiling the theme resources
+    print_info "GTK theme uses binary resources (gtk.gresource)"
+    print_info "Border colors updated in Hyprland configuration"
 
-    # Ask about Waybar colors
+    # Waybar colors
     echo ""
-    read -p "Update Waybar colors to match? (y/n) [y]: " update_waybar
-    if [[ ! $update_waybar =~ ^[Nn]$ ]]; then
-        if [ -f ~/.config/waybar/style.css ]; then
-            # This is a simple replacement - may need manual adjustment
-            print_warning "Waybar color update may require manual adjustment"
-            print_info "Consider editing ~/.config/waybar/style.css manually"
-        fi
-    fi
+    print_info "To change Waybar colors, edit ~/.config/waybar/style.css manually"
 
     print_step "Theme colors applied!"
     print_info "You may need to restart Hyprland for all changes to take effect"

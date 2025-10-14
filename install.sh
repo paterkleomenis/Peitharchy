@@ -140,7 +140,7 @@ if ! sudo pacman -S --needed --noconfirm \
   greetd greetd-tuigreet flameshot \
   wireplumber pavucontrol alsa-utils \
   gst-plugins-good gst-plugins-bad gst-plugins-ugly \
-  kdeconnect \
+  kdeconnect brightnessctl \
   neovim nano curl wget unzip p7zip tar base-devel git ark \
   ttf-jetbrains-mono-nerd inter-font \
   noto-fonts noto-fonts-cjk noto-fonts-emoji \
@@ -243,6 +243,7 @@ mkdir -p ~/.config/rofi
 mkdir -p ~/.config/swaync
 mkdir -p ~/.config/gtk-3.0
 mkdir -p ~/.config/gtk-4.0
+mkdir -p ~/.config/kitty
 mkdir -p ~/.local/bin
 mkdir -p ~/Pictures/wallpapers
 mkdir -p ~/Pictures/Screenshots
@@ -297,6 +298,15 @@ fi
 if [ -f "$SCRIPT_DIR/rofi/config.rasi" ]; then
     print_step "Copying Rofi config..."
     cp "$SCRIPT_DIR/rofi/config.rasi" ~/.config/rofi/config.rasi
+fi
+
+# Copy kitty config if it exists
+if [ -f "$SCRIPT_DIR/kitty/kitty.conf" ]; then
+    print_step "Copying Kitty terminal config..."
+    cp "$SCRIPT_DIR/kitty/kitty.conf" ~/.config/kitty/kitty.conf
+    print_step "Kitty config copied successfully!"
+else
+    print_warning "Kitty config not found. Skipping kitty configuration."
 fi
 
 # Copy wallpapers

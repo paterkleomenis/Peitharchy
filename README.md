@@ -81,7 +81,7 @@ Peitharchy is a complete Hyprland desktop environment setup featuring:
 - greetd, greetd-tuigreet, flameshot
 - wireplumber, pavucontrol, alsa-utils
 - pipewire, pipewire-alsa, pipewire-pulse, pipewire-jack
-- kdeconnect
+- kdeconnect, brightnessctl
 - kitty, neovim, nano
 - ark (archive manager), p7zip, unzip, tar
 - ttf-jetbrains-mono-nerd, inter-font
@@ -152,6 +152,7 @@ After installation, configurations are located at:
 - **Hyprland**: `~/.config/hypr/`
 - **Waybar**: `~/.config/waybar/`
 - **Rofi**: `~/.config/rofi/`
+- **Kitty**: `~/.config/kitty/`
 - **Scripts**: `~/.local/bin/`
 - **GTK**: `~/.config/gtk-3.0/` and `~/.config/gtk-4.0/`
 - **Icons**: `~/.local/share/icons/`
@@ -237,6 +238,28 @@ hyprctl clients | grep class
 ```
 
 See `WINDOW_RULES.md` for complete documentation on customizing window rules for different resolutions.
+
+### Kitty Terminal Customization
+Edit `~/.config/kitty/kitty.conf` to customize your terminal:
+
+**Adjust transparency:**
+```conf
+background_opacity 0.95  # Change value between 0.0-1.0
+```
+
+**Change font size:**
+```conf
+font_size 11.0  # Adjust to your preference
+```
+
+**Modify colors:**
+The configuration uses a dark theme matching Peitharchy. Colors are defined in the color scheme section.
+
+**Dynamic opacity control:**
+- `Ctrl+Shift+A` then `M` - Increase opacity
+- `Ctrl+Shift+A` then `L` - Decrease opacity
+- `Ctrl+Shift+A` then `1` - Set to full opacity
+- `Ctrl+Shift+A` then `D` - Reset to default
 
 ### Waybar Customization
 - Layout: `~/.config/waybar/config`
@@ -378,13 +401,15 @@ Peitharchy/
 │   └── config.toml            # Greetd login manager config
 ├── gtk-3.0/
 │   ├── bookmarks              # File manager bookmarks
-│   ├── colors.css             # Custom color definitions
 │   ├── gtk.css                # GTK 3.0 styling
-│   └── settings.ini           # GTK 3.0 settings
+│   ├── gtk.gresource          # GTK 3.0 theme resources
+│   └── thumbnail.png          # Theme thumbnail
 ├── gtk-4.0/
-│   ├── colors.css             # Custom color definitions
 │   ├── gtk.css                # GTK 4.0 styling
-│   └── settings.ini           # GTK 4.0 settings
+│   ├── gtk.gresource          # GTK 4.0 theme resources
+│   └── thumbnail.png          # Theme thumbnail
+├── kitty/
+│   └── kitty.conf             # Kitty terminal configuration
 ├── hyprland/
 │   ├── appearance.conf        # Visual settings
 │   ├── autostart.conf         # Startup programs
