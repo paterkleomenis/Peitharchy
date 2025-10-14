@@ -103,7 +103,7 @@ Peitharchy is a complete Hyprland desktop environment setup featuring:
 
 1. Clone this repository:
 ```bash
-git clone <repository-url>
+git clone https://github.com/paterkleomenis/Peitharchy.git
 cd Peitharchy
 ```
 
