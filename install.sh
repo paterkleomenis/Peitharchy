@@ -140,11 +140,11 @@ if ! sudo pacman -S --needed --noconfirm \
   greetd greetd-tuigreet flameshot \
   wireplumber pavucontrol alsa-utils \
   gst-plugins-good gst-plugins-bad gst-plugins-ugly \
-  kdeconnect brightnessctl \
+  kdeconnect brightnessctl firefox \
   neovim nano curl wget unzip p7zip tar base-devel git ark \
   ttf-jetbrains-mono-nerd inter-font \
   noto-fonts noto-fonts-cjk noto-fonts-emoji \
-  gnome-system-monitor baobab pipewire pipewire-alsa pipewire-pulse pipewire-jack \
+  baobab pipewire pipewire-alsa pipewire-pulse pipewire-jack \
   kitty gtk3 gtk4 nwg-look gnome-themes-extra dconf; then
     print_error "Failed to install some packages"
     print_warning "Common causes:"
@@ -199,11 +199,11 @@ if [ "$AUR_AVAILABLE" = true ]; then
     print_step "Installing AUR packages..."
 
     # Try to install AUR packages
-    if paru -S --needed --noconfirm xcursor-breeze ghostty 2>/dev/null; then
+    if paru -S --needed --noconfirm xcursor-breeze ghostty pamac-all 2>/dev/null; then
         print_step "AUR packages installed successfully!"
     else
         print_warning "Failed to install some AUR packages"
-        print_info "You can install them manually later with: paru -S xcursor-breeze ghostty"
+        print_info "You can install them manually later with: paru -S xcursor-breeze ghostty pamac-all"
     fi
 else
     print_warning "Skipping AUR packages (AUR unavailable)"
