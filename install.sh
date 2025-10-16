@@ -225,6 +225,19 @@ flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flat
 print_step "Installing MissionCenter..."
 flatpak install -y flathub io.missioncenter.MissionCenter
 
+# Install Nomacs (image viewer)
+print_step "Installing Nomacs (image viewer)..."
+flatpak install -y flathub org.nomacs.ImageLounge
+
+# Make Nomacs the default image viewer for common types
+if command -v xdg-mime >/dev/null 2>&1; then
+  print_info "Setting Nomacs as default image viewer (png/jpg/webp/svg)..."
+  xdg-mime default org.nomacs.ImageLounge.desktop image/png
+  xdg-mime default org.nomacs.ImageLounge.desktop image/jpeg
+  xdg-mime default org.nomacs.ImageLounge.desktop image/webp
+  xdg-mime default org.nomacs.ImageLounge.desktop image/svg+xml
+fi
+
 # Install Kora icon theme
 print_step "Installing Kora icon theme..."
 if [ -f "$SCRIPT_DIR/kora-1-7-2.tar.xz" ]; then
