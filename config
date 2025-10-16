@@ -120,6 +120,7 @@
     "interval": 0,
     "on-scroll-up": "playerctld shift",
     "on-scroll-down": "playerctld unshift",
+    "max-length": 36
     },
      "wireplumber": {
       "format": "{icon} {volume}%",
