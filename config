@@ -20,6 +20,7 @@
       "hyprland/language",
       "custom/clipboard",
       "tray",
+      "battery",
       "custom/nightlight",
       "custom/notification",
       "custom/power"
@@ -136,6 +137,17 @@
       "reverse-direction": false,
       "swap-icon-label": false,
       "ignored-items": []
+    },
+    "battery": {
+      "if": "battery",
+      "format": "{icon} ",
+      "format-charging": " ",
+      "format-plugged": " ",
+      "format-alt": "{time} {power}W",
+      "format-icons": ["", "", "", "", ""],
+      "interval": 30,
+      "tooltip": true,
+      "tooltip-format": "{capacity}%\n{timeTo}"
     },
     "custom/notification": {
       "tooltip": false,
