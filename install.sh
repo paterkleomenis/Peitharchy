@@ -384,6 +384,7 @@ if [[ $INSTALL_GTK =~ ^[Yy]$ ]]; then
     gsettings set org.gnome.desktop.interface icon-theme "kora" 2>/dev/null || true
     gsettings set org.gnome.desktop.interface color-scheme "prefer-dark" 2>/dev/null || true
     gsettings set org.gnome.desktop.interface font-name "Inter,  10" 2>/dev/null || true
+    gsettings set org.gnome.desktop.interface gtk-theme "HighContrastInverse" 2>/dev/null || true
     print_step "GTK settings applied!"
 else
     print_info "Skipping GTK theme installation - keeping your custom theme"
