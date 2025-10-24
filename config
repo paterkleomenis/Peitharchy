@@ -20,7 +20,7 @@
       "hyprland/language",
       "custom/clipboard",
       "tray",
-      "battery",
+      "custom/battery",
       "custom/nightlight",
       "custom/notification",
       "custom/power"
@@ -34,20 +34,20 @@
       "on-click-right": "cliphist wipe && notify-send 'Clipboard' 'History cleared'"
     },
     "custom/nightlight": {
-    "return-type": "json",
-    "exec": "~/.local/bin/hyprsunset.sh",
-    "on-click": "~/.local/bin/hyprsunset.sh toggle",
-    "on-scroll-up": "~/.local/bin/hyprsunset.sh warmer",
-    "on-scroll-down": "~/.local/bin/hyprsunset.sh cooler",
-    "interval": 5,
-    "tooltip": true
+      "return-type": "json",
+      "exec": "~/.local/bin/hyprsunset.sh",
+      "on-click": "~/.local/bin/hyprsunset.sh toggle",
+      "on-scroll-up": "~/.local/bin/hyprsunset.sh warmer",
+      "on-scroll-down": "~/.local/bin/hyprsunset.sh cooler",
+      "interval": 5,
+      "tooltip": true
     },
     "hyprland/language": {
-        "format": "{}",
-        "format-en": "EN",
-        "format-gr": "ΕΛ",
-        "tooltip-format": "Keyboard Layout: {}",
-        "on-click": "~/.local/bin/toggle-layout.sh"
+      "format": "{}",
+      "format-en": "EN",
+      "format-gr": "ΕΛ",
+      "tooltip-format": "Keyboard Layout: {}",
+      "on-click": "~/.local/bin/toggle-layout.sh"
     },
     "hyprland/workspaces": {
       "disable-scroll": true,
@@ -112,25 +112,29 @@
       }
     },
     "mpris": {
-    "format": "{title}",
-    "format-paused": "           {title}",
-    "on-click": "playerctl play-pause",
-    "on-click-right": "playerctl next",
-    "on-click-middle": "playerctl previous",
-    "interval": 0,
-    "on-scroll-up": "playerctld shift",
-    "on-scroll-down": "playerctld unshift",
-    "max-length": 36
+      "format": "{title}",
+      "format-paused": "           {title}",
+      "on-click": "playerctl play-pause",
+      "on-click-right": "playerctl next",
+      "on-click-middle": "playerctl previous",
+      "interval": 0,
+      "on-scroll-up": "playerctld shift",
+      "on-scroll-down": "playerctld unshift",
+      "max-length": 36
     },
-     "wireplumber": {
+    "wireplumber": {
       "format": "{icon} {volume}%",
-      "format-muted": "󰝟    Muted",
+      "format-muted": "󰝟    Muted",
       "format-icons": {
-        "default": ["󰕿", "󰖀", "󰕾"]
+        "default": [
+          "󰕿",
+          "󰖀",
+          "󰕾"
+        ]
       },
-      "on-click":       "killall pavucontrol  || pavucontrol",
+      "on-click": "killall pavucontrol  || pavucontrol",
       "on-click-right": "wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle"
-      },
+    },
     "tray": {
       "icon-size": 16,
       "spacing": 6,
@@ -139,16 +143,12 @@
       "swap-icon-label": false,
       "ignored-items": []
     },
-    "battery": {
-      "if": "battery",
-      "format": "{icon} ",
-      "format-charging": " ",
-      "format-plugged": " ",
-      "format-alt": "{time} {power}W",
-      "format-icons": ["", "", "", "", ""],
-      "interval": 30,
-      "tooltip": true,
-      "tooltip-format": "{capacity}%\n{timeTo}"
+"custom/battery": {
+      "exec": "~/.local/bin/custom_battery.sh",
+      "return-type": "json",
+      "interval": 10,
+      "on-click": "~/.local/bin/toggle-performance.sh",
+      "tooltip": true
     },
     "custom/notification": {
       "tooltip": false,
