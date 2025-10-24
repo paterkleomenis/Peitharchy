@@ -262,6 +262,10 @@ mkdir -p ~/Pictures/wallpapers
 mkdir -p ~/Pictures/Screenshots
 mkdir -p ~/Downloads
 mkdir -p ~/Documents
+mkdir -p ~/Pictures
+mkdir -p ~/Music
+mkdir -p ~/Videos
+xdg-user-dirs-update
 
 # Copy Hyprland configuration files
 print_step "Copying Hyprland configuration files..."
