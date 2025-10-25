@@ -432,6 +432,11 @@ auth       optional     pam_gnome_keyring.so
 session    optional     pam_gnome_keyring.so auto_start
 EOF
 
+# Configure sudoers for CPU frequency control
+print_step "Configuring sudoers for CPU frequency control..."
+echo "$USER ALL=(ALL) NOPASSWD: /usr/bin/tee /sys/devices/system/cpu/*/cpufreq/scaling_governor, /usr/bin/auto-cpufreq" | sudo tee -a /etc/sudoers > /dev/null
+print_step "Sudoers configured for passwordless CPU frequency management!"
+
 # Disable other display managers if they exist
 for dm in gdm sddm lightdm lxdm; do
     if systemctl is-enabled "$dm" &> /dev/null; then
