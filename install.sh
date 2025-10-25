@@ -418,6 +418,20 @@ user = "greeter"
 EOF
 fi
 
+# Configure PAM for greetd
+print_step "Configuring PAM for greetd..."
+sudo tee /etc/pam.d/greetd > /dev/null <<EOF
+#%PAM-1.0
+
+auth       required     pam_securetty.so
+auth       requisite    pam_nologin.so
+auth       include      system-local-login
+account    include      system-local-login
+session    include      system-local-login
+auth       optional     pam_gnome_keyring.so
+session    optional     pam_gnome_keyring.so auto_start
+EOF
+
 # Disable other display managers if they exist
 for dm in gdm sddm lightdm lxdm; do
     if systemctl is-enabled "$dm" &> /dev/null; then
