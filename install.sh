@@ -143,7 +143,7 @@ if ! sudo pacman -S --needed --noconfirm \
   kdeconnect brightnessctl firefox \
   neovim nano curl wget unzip p7zip tar base-devel git ark \
   ttf-jetbrains-mono-nerd inter-font \
-  noto-fonts noto-fonts-cjk noto-fonts-emoji \
+  noto-fonts noto-fonts-cjk noto-fonts-emoji gvfs-mtp mtpfs android-udev \
   baobab pipewire pipewire-alsa pipewire-pulse pipewire-jack \
   kitty gtk3 gtk4 nwg-look gnome-themes-extra dconf; then
     print_error "Failed to install some packages"
