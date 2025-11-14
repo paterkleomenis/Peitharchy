@@ -140,7 +140,7 @@ if ! sudo pacman -S --needed --noconfirm \
   greetd greetd-tuigreet flameshot \
   wireplumber pavucontrol alsa-utils \
   gst-plugins-good gst-plugins-bad gst-plugins-ugly \
-  kdeconnect brightnessctl firefox \
+  kdeconnect brightnessctl firefox usbutils\
   neovim nano curl wget unzip p7zip tar base-devel git ark \
   ttf-jetbrains-mono-nerd inter-font \
   noto-fonts noto-fonts-cjk noto-fonts-emoji gvfs-mtp mtpfs android-udev \
