@@ -199,11 +199,11 @@ if [ "$AUR_AVAILABLE" = true ]; then
     print_step "Installing AUR packages..."
 
     # Try to install AUR packages
-    if paru -S --needed --noconfirm xcursor-breeze ghostty pamac-all 2>/dev/null; then
+    if paru -S --needed --noconfirm xcursor-breeze ghostty 2>/dev/null; then
         print_step "AUR packages installed successfully!"
     else
         print_warning "Failed to install some AUR packages"
-        print_info "You can install them manually later with: paru -S xcursor-breeze ghostty pamac-all"
+        print_info "You can install them manually later with: paru -S xcursor-breeze ghostty"
     fi
 else
     print_warning "Skipping AUR packages (AUR unavailable)"
