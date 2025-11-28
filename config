@@ -19,7 +19,8 @@
       "wireplumber",
       "hyprland/language",
       "custom/clipboard",
-      "tray",
+      "network",
+      "bluetooth",
       "custom/battery",
       "custom/nightlight",
       "custom/notification",
@@ -41,6 +42,24 @@
       "on-scroll-down": "~/.local/bin/hyprsunset.sh cooler",
       "interval": 5,
       "tooltip": true
+    },
+    "network": {
+        "format-wifi": "{icon}",
+        "format-ethernet": "󰈀",
+        "format-disconnected": "󰤮",
+        "format-icons": ["󰤯", "󰤟", "󰤢", "󰤥", "󰤨"],
+        "tooltip-format": "{essid} ({signalStrength}%)",
+        "on-click": "kitty --title 'Wi-Fi Menu' ~/.local/bin/wifi_menu",
+        "on-click-right": "nm-connection-editor"
+    },
+    "bluetooth": {
+        "format": "󰂯",
+        "format-disabled": "󰂲",
+        "format-connected": "󰂱",
+        "tooltip-format": "{controller_alias}\t{controller_address}",
+        "tooltip-format-connected": "{controller_alias}\t{controller_address}\n\n{device_enumerate}",
+        "tooltip-format-enumerate-connected": "{device_alias}\t{device_address}",
+        "on-click": "blueman-manager"
     },
     "hyprland/language": {
       "format": "{}",

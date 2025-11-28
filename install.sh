@@ -289,6 +289,7 @@ if [ -d "$SCRIPT_DIR/scripts" ]; then
     # Copy to ~/.local/bin
     cp -r "$SCRIPT_DIR/scripts"/* ~/.local/bin/
     chmod +x ~/.local/bin/*.sh
+    chmod +x ~/.local/bin/wifi_menu
 
     print_step "Scripts copied to ~/.local/bin and made executable!"
 else
