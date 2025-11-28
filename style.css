@@ -115,7 +115,7 @@ window#waybar {
     color: #ffffff;
     border-radius: 16px;
     margin: 4px 2px;
-    padding: 6px 16px;
+    padding: 6px 6px;
     font-weight: 600;
 }
 
@@ -127,7 +127,7 @@ window#waybar {
     background: rgba(24, 24, 24, 0.3);
     border-radius: 16px;
     margin: 4px 2px;
-    padding: 6px 12px;
+    padding: 6px 6px;
 }
 
 #tray > .passive {
@@ -140,12 +140,10 @@ window#waybar {
 
 #custom-notification {
     background: rgba(24, 24, 24, 0.3);
-    color: #ffffff;
     border-radius: 16px;
     margin: 4px 2px;
-    padding: 6px 12px;
-    font-size: 14px;
-    font-weight: 500;
+    padding: 6px 6px;
+    font-size: 13px;
 }
 
 #custom-power {
@@ -153,7 +151,7 @@ window#waybar {
     color: #ffffff;
     border-radius: 16px;
     margin: 4px 8px;
-    padding: 6px 12px;
+    padding: 6px 6px;
     font-size: 14px;
     font-weight: 500;
 }
@@ -173,4 +171,20 @@ tooltip {
 
 tooltip label {
     color: #ffffff;
+}
+
+#custom-battery {
+    min-width: 25px;
+}
+
+#network,
+#bluetooth {
+    background: rgba(24, 24, 24, 0.3);
+    border-radius: 16px;
+    margin: 4px 2px;
+    padding: 6px 6px;
+}
+
+#network.disconnected {
+    color: #ff6699;
 }
