@@ -288,11 +288,10 @@ print_step "Copying scripts..."
 if [ -d "$SCRIPT_DIR/scripts" ]; then
     # Copy to ~/.local/bin
     cp -r "$SCRIPT_DIR/scripts"/* ~/.local/bin/
-    chmod +x ~/.local/bin/*.sh
-    chmod +x ~/.local/bin/wifi_menu
+    chmod +x ~/.local/bin/*
 
     print_step "Scripts copied to ~/.local/bin and made executable!"
-    
+
     # Generate GPU environment config
     print_step "Detecting GPU and generating configuration..."
     "$SCRIPT_DIR/scripts/generate-gpu-env.sh"
