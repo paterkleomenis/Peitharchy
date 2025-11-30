@@ -292,6 +292,10 @@ if [ -d "$SCRIPT_DIR/scripts" ]; then
     chmod +x ~/.local/bin/wifi_menu
 
     print_step "Scripts copied to ~/.local/bin and made executable!"
+    
+    # Generate GPU environment config
+    print_step "Detecting GPU and generating configuration..."
+    "$SCRIPT_DIR/scripts/generate-gpu-env.sh"
 else
     print_warning "Scripts directory not found. Skipping scripts."
 fi
@@ -481,4 +485,26 @@ echo "  - nwg-look (installed)"
 echo ""
 print_info "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo ""
-print_step "Enjoy your Hyprland setup! 🚀"
+
+# Configure sudoers for passwordless power management
+print_step "Configuring passwordless sudo for power management..."
+SUDOERS_FILE="/etc/sudoers.d/peitharchy"
+USERNAME=$(whoami)
+
+# Create the file content
+# We allow the user to run tlp and auto-cpufreq without password
+# This allows the toggle scripts to work smoothly
+if ! sudo tee "$SUDOERS_FILE" > /dev/null <<CONTENTS
+$USERNAME ALL=(ALL) NOPASSWD: /usr/bin/tlp
+$USERNAME ALL=(ALL) NOPASSWD: /usr/local/bin/auto-cpufreq
+$USERNAME ALL=(ALL) NOPASSWD: /usr/bin/auto-cpufreq
+CONTENTS
+then
+    print_warning "Failed to write to $SUDOERS_FILE. You may need to enter password for power modes."
+else
+    # Set correct permissions (critical for sudoers files)
+    sudo chmod 440 "$SUDOERS_FILE"
+    print_info "Passwordless sudo configured for TLP and auto-cpufreq."
+fi
+
+print_step "Installation complete! Please reboot your system."

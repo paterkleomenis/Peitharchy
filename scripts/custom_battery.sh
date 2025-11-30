@@ -22,10 +22,26 @@ if [[ -f "$MODE_FILE" ]]; then
     MODE=$(cat "$MODE_FILE")
 fi
 
+# Calculate Power Draw (Watts)
+POWER_WATTS="0.00"
+if [[ -f "$BAT_PATH/power_now" ]]; then
+    POWER_U=$(cat "$BAT_PATH/power_now")
+    POWER_WATTS=$(echo "scale=2; $POWER_U / 1000000" | bc)
+elif [[ -f "$BAT_PATH/current_now" ]] && [[ -f "$BAT_PATH/voltage_now" ]]; then
+    CURRENT_U=$(cat "$BAT_PATH/current_now")
+    VOLTAGE_U=$(cat "$BAT_PATH/voltage_now")
+    POWER_WATTS=$(echo "scale=2; ($CURRENT_U * $VOLTAGE_U) / 1000000000000" | bc 2>/dev/null || echo "0.00")
+    # If result is 0 (bc issue), try simpler math or just skip
+    if [[ "$POWER_WATTS" == "0" ]]; then
+       # Fallback approximation if numbers are too big for standard shell arithmetic without bc
+       POWER_WATTS=$(awk "BEGIN {printf \"%.2f\", ($CURRENT_U * $VOLTAGE_U) / 1000000000000}")
+    fi
+fi
+
 # Choose icon based on capacity and status
 if [[ "$STATUS" == "Charging" ]]; then
     ICON="󰂄"
-    STATUS_TEXT="Charging"
+    STATUS_TEXT="Charging (+${POWER_WATTS}W)"
 elif [[ "$STATUS" == "Full" ]]; then
     ICON="󰁹"
     STATUS_TEXT="Full"
@@ -33,6 +49,7 @@ elif [[ "$STATUS" == "Not charging" ]]; then
     ICON="󰚥"
     STATUS_TEXT="Plugged In"
 else
+    STATUS_TEXT="Discharging (-${POWER_WATTS}W)"
     # Discharging - show icon based on capacity
     if [[ $CAPACITY -ge 90 ]]; then
         ICON="󰁹"
@@ -67,4 +84,4 @@ fi
 
 
 # Output JSON for Waybar
-echo "{\"text\": \"${ICON}\", \"tooltip\": \"Battery: ${CAPACITY}% (${STATUS_TEXT})\\nCPU Mode: ${MODE}\", \"class\": \"battery-${STATUS,,}\"}"
+echo "{\"text\": \"${ICON}\", \"tooltip\": \"Battery: ${CAPACITY}% (${STATUS_TEXT})\\nPower: ${POWER_WATTS}W\\nCPU Mode: ${MODE}\", \"class\": \"battery-${STATUS,,}\"}"
