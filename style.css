@@ -125,17 +125,7 @@ window#waybar {
 
 #tray {
     background: rgba(24, 24, 24, 0.3);
-    border-radius: 16px;
-    margin: 4px 2px;
-    padding: 6px 6px;
-}
-
-#tray > .passive {
-    color: #cccccc;
-}
-
-#tray > .active {
-    color: #ffffff;
+    margin: 2px 4px;
 }
 
 #custom-notification {

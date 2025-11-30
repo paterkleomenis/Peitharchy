@@ -21,6 +21,7 @@
       "custom/clipboard",
       "network",
       "bluetooth",
+      "tray",
       "custom/battery",
       "custom/nightlight",
       "custom/notification",
@@ -123,19 +124,6 @@
       "on-scroll-down": "playerctld unshift",
       "max-length": 36
     },
-    "wireplumber": {
-      "format": "{icon} {volume}%",
-      "format-muted": "󰝟    Muted",
-      "format-icons": {
-        "default": [
-          "󰕿",
-          "󰖀",
-          "󰕾"
-        ]
-      },
-      "on-click": "killall pavucontrol  || pavucontrol",
-      "on-click-right": "wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle"
-    },
     "network": {
         "format-wifi": "{icon}",
         "format-ethernet": "󰈀",
@@ -154,6 +142,24 @@
         "tooltip-format-enumerate-connected": "{device_alias}\t{device_address}",
         "on-click": "blueman-manager"
     },
+    "tray": {
+        "icon-size": 15,
+        "spacing": 12
+    },
+    "wireplumber": {
+      "format": "{icon} {volume}%",
+      "format-muted": "󰝟    Muted",
+      "format-icons": {
+        "default": [
+          "󰕿",
+          "󰖀",
+          "󰕾"
+        ]
+      },
+      "on-click": "killall pavucontrol  || pavucontrol",
+      "on-click-right": "wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle"
+    },
+
     "custom/battery": {
       "exec": "~/.local/bin/custom_battery.sh",
       "return-type": "json",
