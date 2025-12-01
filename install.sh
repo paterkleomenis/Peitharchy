@@ -71,7 +71,7 @@ backup_existing_configs() {
         [ -d ~/.config/gtk-4.0 ] && cp -r ~/.config/gtk-4.0 "$backup_dir/"
 
         print_info "Backup created at: $backup_dir"
-    else
+else
         print_info "No existing configurations found, skipping backup"
     fi
 }
@@ -80,7 +80,6 @@ backup_existing_configs() {
 if [ "$EUID" -eq 0 ]; then
     print_error "Do not run this script as root. It will use sudo when needed."
     exit 1
-fi
 
 # Get the directory where the script is located
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -105,7 +104,6 @@ if ! sudo pacman -Sy --noconfirm; then
     print_warning "Failed to sync package databases"
     print_info "Trying to refresh keyrings..."
     sudo pacman -Sy --noconfirm archlinux-keyring || true
-fi
 
 if ! sudo pacman -Su --noconfirm; then
     print_error "Failed to update system packages"
@@ -124,7 +122,6 @@ if ! sudo pacman -Su --noconfirm; then
         print_error "Installation aborted"
         exit 1
     fi
-fi
 
 # Install main packages
 print_step "Installing main packages..."
@@ -140,7 +137,7 @@ if ! sudo pacman -S --needed --noconfirm \
   greetd greetd-tuigreet flameshot \
   wireplumber pavucontrol alsa-utils \
   gst-plugins-good gst-plugins-bad gst-plugins-ugly \
-  kdeconnect brightnessctl firefox usbutils\
+  kdeconnect brightnessctl firefox usbutils tlp\
   neovim nano curl wget unzip p7zip tar base-devel git ark \
   ttf-jetbrains-mono-nerd inter-font \
   noto-fonts noto-fonts-cjk noto-fonts-emoji gvfs-mtp mtpfs android-udev \
@@ -161,7 +158,6 @@ if ! sudo pacman -S --needed --noconfirm \
     if [[ ! $REPLY =~ ^[Yy]$ ]]; then
         exit 1
     fi
-fi
 
 print_step "Main packages installed successfully!"
 
@@ -174,7 +170,6 @@ else
     print_warning "Cannot reach AUR (aur.archlinux.org)"
     print_warning "AUR packages will be skipped"
     AUR_AVAILABLE=false
-fi
 
 if [ "$AUR_AVAILABLE" = true ]; then
     if ! command -v paru &> /dev/null; then
@@ -189,10 +184,9 @@ if [ "$AUR_AVAILABLE" = true ]; then
             print_error "Failed to clone paru from AUR"
             AUR_AVAILABLE=false
         fi
-    else
+else
         print_info "Paru is already installed"
     fi
-fi
 
 # Install AUR packages (optional)
 if [ "$AUR_AVAILABLE" = true ]; then
@@ -201,7 +195,7 @@ if [ "$AUR_AVAILABLE" = true ]; then
     # Try to install AUR packages
     if paru -S --needed --noconfirm xcursor-breeze ghostty 2>/dev/null; then
         print_step "AUR packages installed successfully!"
-    else
+else
         print_warning "Failed to install some AUR packages"
         print_info "You can install them manually later with: paru -S xcursor-breeze ghostty"
     fi
@@ -211,7 +205,6 @@ else
     echo "  - sudo pacman -S xcursor-themes"
     echo "  - Or use system default cursor"
     print_info "Ghostty terminal skipped - kitty will be your default terminal"
-fi
 
 # Install Flatpak
 print_step "Installing Flatpak..."
@@ -236,7 +229,6 @@ if command -v xdg-mime >/dev/null 2>&1; then
   xdg-mime default org.nomacs.ImageLounge.desktop image/jpeg
   xdg-mime default org.nomacs.ImageLounge.desktop image/webp
   xdg-mime default org.nomacs.ImageLounge.desktop image/svg+xml
-fi
 
 # Install Kora icon theme
 print_step "Installing Kora icon theme..."
@@ -246,7 +238,6 @@ if [ -f "$SCRIPT_DIR/kora-1-7-2.tar.xz" ]; then
     print_step "Kora icon theme installed successfully!"
 else
     print_warning "kora-1-7-2.tar.xz not found in $SCRIPT_DIR. Skipping icon theme installation."
-fi
 
 # Create necessary directories
 print_step "Creating configuration directories..."
@@ -281,7 +272,6 @@ if [ -d "$SCRIPT_DIR/hyprland" ]; then
     print_step "Hyprland configs copied successfully!"
 else
     print_warning "Hyprland directory not found. Skipping Hyprland configs."
-fi
 
 # Copy scripts to ~/.local/bin only (no duplication)
 print_step "Copying scripts..."
@@ -297,7 +287,6 @@ if [ -d "$SCRIPT_DIR/scripts" ]; then
     "$SCRIPT_DIR/scripts/generate-gpu-env.sh"
 else
     print_warning "Scripts directory not found. Skipping scripts."
-fi
 
 # Copy waybar config if it exists
 if [ -f "$SCRIPT_DIR/config" ]; then
@@ -307,19 +296,16 @@ if [ -f "$SCRIPT_DIR/config" ]; then
     # Update waybar config to use ~/.local/bin for scripts
     sed -i 's|~/.config/waybar/scripts/|~/.local/bin/|g' ~/.config/waybar/config
     print_info "Updated Waybar config to use ~/.local/bin for scripts"
-fi
 
 # Copy waybar style if it exists
 if [ -f "$SCRIPT_DIR/style.css" ]; then
     print_step "Copying Waybar style..."
     cp "$SCRIPT_DIR/style.css" ~/.config/waybar/style.css
-fi
 
 # Copy rofi config if it exists
 if [ -f "$SCRIPT_DIR/rofi/config.rasi" ]; then
     print_step "Copying Rofi config..."
     cp "$SCRIPT_DIR/rofi/config.rasi" ~/.config/rofi/config.rasi
-fi
 
 # Copy kitty config if it exists
 if [ -f "$SCRIPT_DIR/kitty/kitty.conf" ]; then
@@ -328,7 +314,6 @@ if [ -f "$SCRIPT_DIR/kitty/kitty.conf" ]; then
     print_step "Kitty config copied successfully!"
 else
     print_warning "Kitty config not found. Skipping kitty configuration."
-fi
 
 # Copy wallpapers
 print_step "Copying wallpapers..."
@@ -337,7 +322,6 @@ if [ -d "$SCRIPT_DIR/wallpapers" ]; then
     print_step "Wallpapers copied successfully!"
 else
     print_warning "Wallpapers directory not found. Skipping wallpapers."
-fi
 
 # Copy GTK configuration files (Optional - ask user)
 echo ""
@@ -349,7 +333,6 @@ CUSTOM_GTK=false
 if [ -f ~/.config/gtk-3.0/gtk.gresource ] || [ -f ~/.config/gtk-4.0/gtk.gresource ]; then
     print_info "Custom GTK theme detected!"
     CUSTOM_GTK=true
-fi
 
 if [ "$CUSTOM_GTK" = true ]; then
     print_warning "You appear to have a custom GTK theme installed"
@@ -358,7 +341,6 @@ if [ "$CUSTOM_GTK" = true ]; then
 else
     read -p "Install Peitharchy GTK theme? (Y/n): " -r
     INSTALL_GTK=${REPLY:-Y}
-fi
 
 if [[ $INSTALL_GTK =~ ^[Yy]$ ]]; then
     print_step "Installing GTK configuration files..."
@@ -373,7 +355,7 @@ if [[ $INSTALL_GTK =~ ^[Yy]$ ]]; then
         fi
 
         print_step "GTK 3.0 configs copied!"
-    else
+else
         print_warning "gtk-3.0 directory not found in source. Skipping."
     fi
 
@@ -381,7 +363,7 @@ if [[ $INSTALL_GTK =~ ^[Yy]$ ]]; then
     if [ -d "$SCRIPT_DIR/gtk-4.0" ]; then
         cp -r "$SCRIPT_DIR/gtk-4.0"/* ~/.config/gtk-4.0/
         print_step "GTK 4.0 configs copied!"
-    else
+else
         print_warning "gtk-4.0 directory not found in source. Skipping."
     fi
 
@@ -397,7 +379,6 @@ if [[ $INSTALL_GTK =~ ^[Yy]$ ]]; then
 else
     print_info "Skipping GTK theme installation - keeping your custom theme"
     print_info "Your custom GTK theme will be preserved"
-fi
 
 # Enable greetd service
 print_step "Enabling greetd service..."
@@ -420,7 +401,6 @@ vt = 1
 command = "tuigreet --cmd Hyprland"
 user = "greeter"
 EOF
-fi
 
 # Configure PAM for greetd
 print_step "Configuring PAM for greetd..."
@@ -495,8 +475,15 @@ USERNAME=$(whoami)
 # This allows the toggle scripts to work smoothly
 if ! sudo tee "$SUDOERS_FILE" > /dev/null <<CONTENTS
 $USERNAME ALL=(ALL) NOPASSWD: /usr/bin/tlp
+$USERNAME ALL=(ALL) NOPASSWD: /home/$USERNAME/Peitharchy/scripts/toggle-performance.sh
 $USERNAME ALL=(ALL) NOPASSWD: /usr/local/bin/auto-cpufreq
 $USERNAME ALL=(ALL) NOPASSWD: /usr/bin/auto-cpufreq
+$USERNAME ALL=(ALL) NOPASSWD: /usr/bin/systemctl start auto-cpufreq
+$USERNAME ALL=(ALL) NOPASSWD: /usr/bin/systemctl stop auto-cpufreq
+$USERNAME ALL=(ALL) NOPASSWD: /usr/bin/systemctl enable auto-cpufreq
+$USERNAME ALL=(ALL) NOPASSWD: /usr/bin/systemctl disable auto-cpufreq
+$USERNAME ALL=(ALL) NOPASSWD: /usr/bin/systemctl enable --now tlp
+$USERNAME ALL=(ALL) NOPASSWD: /usr/bin/systemctl disable --now tlp
 CONTENTS
 then
     print_warning "Failed to write to $SUDOERS_FILE. You may need to enter password for power modes."
@@ -504,6 +491,23 @@ else
     # Set correct permissions (critical for sudoers files)
     sudo chmod 440 "$SUDOERS_FILE"
     print_info "Passwordless sudo configured for TLP and auto-cpufreq."
+fi
+
+
+# Check if this is a laptop (has battery)
+if [ -d /sys/class/power_supply/BAT0 ] || [ -d /sys/class/power_supply/BAT1 ]; then
+    print_step "Laptop detected, configuring power management..."
+    # Enable TLP service
+    print_step "Enabling TLP service..."
+    sudo systemctl enable --now tlp
+    print_info "TLP service enabled"
+    
+    # Disable TLP CPU management by default (let auto-cpufreq handle it)
+    print_step "Configuring TLP to not manage CPU (auto-cpufreq will handle it)..."
+    sudo "$SCRIPT_DIR/scripts/toggle-performance.sh" disable_cpu
+    print_info "TLP CPU disabled, auto-cpufreq active"
+else
+    print_info "No battery detected, skipping laptop power management setup"
 fi
 
 print_step "Installation complete! Please reboot your system."

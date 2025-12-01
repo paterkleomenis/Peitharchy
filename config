@@ -125,6 +125,7 @@
       "max-length": 36
     },
     "network": {
+        "interface": "wl*",
         "format-wifi": "{icon}",
         "format-ethernet": "󰈀",
         "format-disconnected": "󰤮",
