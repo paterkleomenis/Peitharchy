@@ -476,6 +476,7 @@ USERNAME=$(whoami)
 if ! sudo tee "$SUDOERS_FILE" > /dev/null <<CONTENTS
 $USERNAME ALL=(ALL) NOPASSWD: /usr/bin/tlp
 $USERNAME ALL=(ALL) NOPASSWD: /home/$USERNAME/Peitharchy/scripts/toggle-performance.sh
+$USERNAME ALL=(ALL) NOPASSWD: /home/$USERNAME/.local/bin/toggle-performance.sh
 $USERNAME ALL=(ALL) NOPASSWD: /usr/local/bin/auto-cpufreq
 $USERNAME ALL=(ALL) NOPASSWD: /usr/bin/auto-cpufreq
 $USERNAME ALL=(ALL) NOPASSWD: /usr/bin/systemctl start auto-cpufreq

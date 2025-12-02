@@ -2,9 +2,31 @@
 # Peitharchy Consolidated Power Manager
 # Handles switching modes (Powersave/Performance) AND granular TLP settings.
 
-MODE_FILE="$HOME/.cache/cpu_mode"
+# Use SUDO_USER's home if running under sudo, otherwise use HOME
+if [[ -n "$SUDO_USER" ]]; then
+    USER_HOME=$(getent passwd "$SUDO_USER" | cut -d: -f6)
+else
+    USER_HOME="$HOME"
+fi
+
+MODE_FILE="$USER_HOME/.cache/cpu_mode"
 TLP_CONF="/etc/tlp.conf"
 mkdir -p "$(dirname "$MODE_FILE")"
+
+# --- NOTIFICATION HELPER ---
+# Handles notify-send properly when running under sudo
+send_notification() {
+    local title="$1"
+    local message="$2"
+    
+    if [[ -n "$SUDO_USER" ]]; then
+        # Running under sudo, use the original user's session
+        local user_id=$(id -u "$SUDO_USER")
+        sudo -u "$SUDO_USER" DISPLAY=:0 DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${user_id}/bus" notify-send "$title" "$message" 2>/dev/null || true
+    else
+        notify-send "$title" "$message" 2>/dev/null || true
+    fi
+}
 
 # --- INTERNAL HELPER FUNCTIONS FOR TLP ---
 
@@ -44,7 +66,7 @@ case "$COMMAND" in
             sudo "$0" internal_disable_pcie
             sudo "$0" internal_disable_usb
             echo "performance" > "$MODE_FILE"
-            notify-send "Power Mode" "Switched to Performance mode ⚡"
+            send_notification "Power Mode" "Switched to Performance mode ⚡"
         else
             sudo /usr/local/bin/auto-cpufreq --force powersave
             hyprctl keyword misc:vfr true
@@ -58,7 +80,7 @@ case "$COMMAND" in
                 fi
             fi
             echo "powersave" > "$MODE_FILE"
-            notify-send "Power Mode" "Switched to Power Save mode 🌿"
+            send_notification "Power Mode" "Switched to Power Save mode 🌿"
         fi
         ;;
 
@@ -71,6 +93,7 @@ case "$COMMAND" in
         set_param "CPU_ENERGY_PERF_POLICY_ON_AC" "balance_performance"
         set_param "CPU_ENERGY_PERF_POLICY_ON_BAT" "balance_power"
         apply_tlp
+        send_notification "CPU Management" "TLP now controls CPU ⚙️"
         ;;
 
     "disable_cpu")
@@ -92,6 +115,7 @@ case "$COMMAND" in
         apply_tlp
         systemctl enable auto-cpufreq
         systemctl start auto-cpufreq
+        send_notification "CPU Management" "auto-cpufreq now controls CPU 🔄"
         ;;
 
     "enable_wifi"|"internal_enable_wifi")
@@ -138,20 +162,24 @@ case "$COMMAND" in
         set_param "START_CHARGE_THRESH_BAT0" "40"
         set_param "STOP_CHARGE_THRESH_BAT0" "80"
         apply_tlp
+        send_notification "Battery" "Charge limit enabled (40-80%) 🔋"
         ;;
 
     "disable_threshold")
         sed -i 's/^START_CHARGE_THRESH_BAT0/#START_CHARGE_THRESH_BAT0/g' "$TLP_CONF"
         sed -i 's/^STOP_CHARGE_THRESH_BAT0/#STOP_CHARGE_THRESH_BAT0/g' "$TLP_CONF"
         apply_tlp
+        send_notification "Battery" "Charge limit disabled (full charge) 🔌"
         ;;
 
     "start_tlp")
         systemctl enable --now tlp
+        send_notification "TLP" "TLP service started ✓"
         ;;
 
     "stop_tlp")
         systemctl disable --now tlp
+        send_notification "TLP" "TLP service stopped ✗"
         ;;
 
     *)
