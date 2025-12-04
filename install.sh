@@ -104,6 +104,7 @@ if ! sudo pacman -Sy --noconfirm; then
     print_warning "Failed to sync package databases"
     print_info "Trying to refresh keyrings..."
     sudo pacman -Sy --noconfirm archlinux-keyring || true
+fi
 
 if ! sudo pacman -Su --noconfirm; then
     print_error "Failed to update system packages"
@@ -122,6 +123,7 @@ if ! sudo pacman -Su --noconfirm; then
         print_error "Installation aborted"
         exit 1
     fi
+fi
 
 # Install main packages
 print_step "Installing main packages..."
@@ -138,7 +140,7 @@ if ! sudo pacman -S --needed --noconfirm \
   wireplumber pavucontrol alsa-utils \
   gst-plugins-good gst-plugins-bad gst-plugins-ugly \
   kdeconnect brightnessctl firefox usbutils tlp\
-  neovim nano curl wget unzip p7zip tar base-devel git ark \
+  neovim nano curl wget unzip p7zip tar base-devel git ark cmake cpio meson \
   ttf-jetbrains-mono-nerd inter-font \
   noto-fonts noto-fonts-cjk noto-fonts-emoji gvfs-mtp mtpfs android-udev \
   baobab pipewire pipewire-alsa pipewire-pulse pipewire-jack \
@@ -158,6 +160,7 @@ if ! sudo pacman -S --needed --noconfirm \
     if [[ ! $REPLY =~ ^[Yy]$ ]]; then
         exit 1
     fi
+fi
 
 print_step "Main packages installed successfully!"
 
@@ -272,6 +275,35 @@ if [ -d "$SCRIPT_DIR/hyprland" ]; then
     print_step "Hyprland configs copied successfully!"
 else
     print_warning "Hyprland directory not found. Skipping Hyprland configs."
+fi
+
+# Setup Hyprland Plugins
+print_step "Setting up Hyprland Plugins..."
+if command -v hyprpm &> /dev/null; then
+    print_info "Updating hyprpm headers (this may take a while)..."
+    if hyprpm update; then
+        print_info "Installing hyprexpo plugin..."
+        # Check if already added
+        if ! hyprpm list | grep -q "hyprland-plugins"; then
+             if hyprpm add https://github.com/hyprwm/hyprland-plugins; then
+                print_info "Plugin repository added successfully."
+             else
+                print_error "Failed to add plugin repository."
+             fi
+        fi
+
+        # Enable hyprexpo
+        if hyprpm enable hyprexpo; then
+            print_step "hyprexpo plugin enabled successfully!"
+        else
+            print_error "Failed to enable hyprexpo plugin."
+        fi
+    else
+        print_error "Failed to update hyprpm headers."
+    fi
+else
+    print_warning "hyprpm not found. Skipping plugin setup."
+fi
 
 # Copy scripts to ~/.local/bin only (no duplication)
 print_step "Copying scripts..."
@@ -287,6 +319,7 @@ if [ -d "$SCRIPT_DIR/scripts" ]; then
     "$SCRIPT_DIR/scripts/generate-gpu-env.sh"
 else
     print_warning "Scripts directory not found. Skipping scripts."
+fi
 
 # Copy waybar config if it exists
 if [ -f "$SCRIPT_DIR/config" ]; then
@@ -296,16 +329,19 @@ if [ -f "$SCRIPT_DIR/config" ]; then
     # Update waybar config to use ~/.local/bin for scripts
     sed -i 's|~/.config/waybar/scripts/|~/.local/bin/|g' ~/.config/waybar/config
     print_info "Updated Waybar config to use ~/.local/bin for scripts"
+fi
 
 # Copy waybar style if it exists
 if [ -f "$SCRIPT_DIR/style.css" ]; then
     print_step "Copying Waybar style..."
     cp "$SCRIPT_DIR/style.css" ~/.config/waybar/style.css
+fi
 
 # Copy rofi config if it exists
 if [ -f "$SCRIPT_DIR/rofi/config.rasi" ]; then
     print_step "Copying Rofi config..."
     cp "$SCRIPT_DIR/rofi/config.rasi" ~/.config/rofi/config.rasi
+fi
 
 # Copy kitty config if it exists
 if [ -f "$SCRIPT_DIR/kitty/kitty.conf" ]; then
@@ -314,6 +350,7 @@ if [ -f "$SCRIPT_DIR/kitty/kitty.conf" ]; then
     print_step "Kitty config copied successfully!"
 else
     print_warning "Kitty config not found. Skipping kitty configuration."
+fi
 
 # Copy wallpapers
 print_step "Copying wallpapers..."
@@ -322,6 +359,7 @@ if [ -d "$SCRIPT_DIR/wallpapers" ]; then
     print_step "Wallpapers copied successfully!"
 else
     print_warning "Wallpapers directory not found. Skipping wallpapers."
+fi
 
 # Copy GTK configuration files (Optional - ask user)
 echo ""
@@ -333,6 +371,7 @@ CUSTOM_GTK=false
 if [ -f ~/.config/gtk-3.0/gtk.gresource ] || [ -f ~/.config/gtk-4.0/gtk.gresource ]; then
     print_info "Custom GTK theme detected!"
     CUSTOM_GTK=true
+fi
 
 if [ "$CUSTOM_GTK" = true ]; then
     print_warning "You appear to have a custom GTK theme installed"
@@ -341,6 +380,7 @@ if [ "$CUSTOM_GTK" = true ]; then
 else
     read -p "Install Peitharchy GTK theme? (Y/n): " -r
     INSTALL_GTK=${REPLY:-Y}
+fi
 
 if [[ $INSTALL_GTK =~ ^[Yy]$ ]]; then
     print_step "Installing GTK configuration files..."
@@ -379,6 +419,7 @@ else
 else
     print_info "Skipping GTK theme installation - keeping your custom theme"
     print_info "Your custom GTK theme will be preserved"
+fi
 
 # Enable greetd service
 print_step "Enabling greetd service..."
@@ -401,6 +442,7 @@ vt = 1
 command = "tuigreet --cmd Hyprland"
 user = "greeter"
 EOF
+fi
 
 # Configure PAM for greetd
 print_step "Configuring PAM for greetd..."
@@ -502,7 +544,7 @@ if [ -d /sys/class/power_supply/BAT0 ] || [ -d /sys/class/power_supply/BAT1 ]; t
     print_step "Enabling TLP service..."
     sudo systemctl enable --now tlp
     print_info "TLP service enabled"
-    
+
     # Disable TLP CPU management by default (let auto-cpufreq handle it)
     print_step "Configuring TLP to not manage CPU (auto-cpufreq will handle it)..."
     sudo "$SCRIPT_DIR/scripts/toggle-performance.sh" disable_cpu
