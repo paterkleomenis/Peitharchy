@@ -145,7 +145,7 @@ if ! sudo pacman -S --needed --noconfirm \
   ttf-jetbrains-mono-nerd inter-font \
   noto-fonts noto-fonts-cjk noto-fonts-emoji gvfs-mtp mtpfs android-udev \
   baobab pipewire pipewire-alsa pipewire-pulse pipewire-jack \
-  kitty gtk3 gtk4 nwg-look gnome-themes-extra dconf; then
+  kitty gtk3 gtk4 nwg-look gnome-themes-extra dconf xdg-user-dirs; then
     print_error "Failed to install some packages"
     print_warning "Common causes:"
     echo "  - Mirror is down or slow"
@@ -265,7 +265,11 @@ mkdir -p ~/Documents
 mkdir -p ~/Pictures
 mkdir -p ~/Music
 mkdir -p ~/Videos
-xdg-user-dirs-update
+if command -v xdg-user-dirs-update >/dev/null 2>&1; then
+    xdg-user-dirs-update
+else
+    print_warning "xdg-user-dirs-update not found. You may need to install xdg-user-dirs package manually."
+fi
 
 # Copy Hyprland configuration files
 print_step "Copying Hyprland configuration files..."
