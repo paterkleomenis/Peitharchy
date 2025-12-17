@@ -137,7 +137,7 @@ if ! sudo pacman -S --needed --noconfirm \
   playerctl jq grim slurp \
   nautilus network-manager-applet blueman \
   gnome-keyring libsecret polkit gcr \
-  greetd greetd-tuigreet flameshot \
+  greetd flameshot \
   wireplumber pavucontrol alsa-utils \
   gst-plugins-good gst-plugins-bad gst-plugins-ugly \
   kdeconnect brightnessctl firefox usbutils tlp\

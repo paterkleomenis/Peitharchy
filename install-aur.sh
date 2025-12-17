@@ -143,6 +143,18 @@ else
     print_warning "✗ Failed to install ghostty"
 fi
 
+echo ""
+
+# Install greetd-tuigreet from AUR (as replacement for official package)
+print_info "Installing greetd-tuigreet from AUR..."
+if paru -S --needed --noconfirm greetd-tuigreet; then
+    INSTALLED+=("greetd-tuigreet")
+    print_info "✓ greetd-tuigreet installed from AUR"
+else
+    FAILED+=("greetd-tuigreet")
+    print_warning "✗ Failed to install greetd-tuigreet from AUR"
+fi
+
 # Summary
 echo ""
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
