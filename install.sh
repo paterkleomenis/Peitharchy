@@ -80,6 +80,7 @@ else
 if [ "$EUID" -eq 0 ]; then
     print_error "Do not run this script as root. It will use sudo when needed."
     exit 1
+fi
 
 # Get the directory where the script is located
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -173,6 +174,7 @@ else
     print_warning "Cannot reach AUR (aur.archlinux.org)"
     print_warning "AUR packages will be skipped"
     AUR_AVAILABLE=false
+fi
 
 if [ "$AUR_AVAILABLE" = true ]; then
     if ! command -v paru &> /dev/null; then
@@ -187,9 +189,10 @@ if [ "$AUR_AVAILABLE" = true ]; then
             print_error "Failed to clone paru from AUR"
             AUR_AVAILABLE=false
         fi
-else
+    else
         print_info "Paru is already installed"
     fi
+fi
 
 # Install AUR packages (optional)
 if [ "$AUR_AVAILABLE" = true ]; then
@@ -198,7 +201,7 @@ if [ "$AUR_AVAILABLE" = true ]; then
     # Try to install AUR packages
     if paru -S --needed --noconfirm xcursor-breeze ghostty 2>/dev/null; then
         print_step "AUR packages installed successfully!"
-else
+    else
         print_warning "Failed to install some AUR packages"
         print_info "You can install them manually later with: paru -S xcursor-breeze ghostty"
     fi
@@ -208,6 +211,7 @@ else
     echo "  - sudo pacman -S xcursor-themes"
     echo "  - Or use system default cursor"
     print_info "Ghostty terminal skipped - kitty will be your default terminal"
+fi
 
 # Install Flatpak
 print_step "Installing Flatpak..."
@@ -232,6 +236,7 @@ if command -v xdg-mime >/dev/null 2>&1; then
   xdg-mime default org.nomacs.ImageLounge.desktop image/jpeg
   xdg-mime default org.nomacs.ImageLounge.desktop image/webp
   xdg-mime default org.nomacs.ImageLounge.desktop image/svg+xml
+fi
 
 # Install Kora icon theme
 print_step "Installing Kora icon theme..."
@@ -241,6 +246,7 @@ if [ -f "$SCRIPT_DIR/kora-1-7-2.tar.xz" ]; then
     print_step "Kora icon theme installed successfully!"
 else
     print_warning "kora-1-7-2.tar.xz not found in $SCRIPT_DIR. Skipping icon theme installation."
+fi
 
 # Create necessary directories
 print_step "Creating configuration directories..."
@@ -395,7 +401,7 @@ if [[ $INSTALL_GTK =~ ^[Yy]$ ]]; then
         fi
 
         print_step "GTK 3.0 configs copied!"
-else
+    else
         print_warning "gtk-3.0 directory not found in source. Skipping."
     fi
 
@@ -403,7 +409,7 @@ else
     if [ -d "$SCRIPT_DIR/gtk-4.0" ]; then
         cp -r "$SCRIPT_DIR/gtk-4.0"/* ~/.config/gtk-4.0/
         print_step "GTK 4.0 configs copied!"
-else
+    else
         print_warning "gtk-4.0 directory not found in source. Skipping."
     fi
 
