@@ -31,6 +31,19 @@ print_info() {
 
 # Check for required dependencies
 check_dependencies() {
+install_wifi_menu() {
+    print_step "Installing wifi_menu..."
+    local url="https://github.com/paterkleomenis/wifi_menu/releases/latest/download/wifi_menu"
+    
+    if curl -L -o wifi_menu "$url"; then
+        chmod +x wifi_menu
+        sudo mv wifi_menu /usr/local/bin/
+        print_step "wifi_menu installed successfully!"
+    else
+        print_error "Failed to download wifi_menu."
+    fi
+}
+
     print_step "Checking for required dependencies..."
     local missing=()
     # Only check for tools needed by the install script itself
@@ -331,6 +344,9 @@ else
     print_warning "Scripts directory not found. Skipping scripts."
 fi
 
+# Install wifi_menu
+install_wifi_menu
+
 # Copy waybar config if it exists
 if [ -f "$SCRIPT_DIR/config" ]; then
     print_step "Copying Waybar config..."
@@ -527,7 +543,7 @@ USERNAME=$(whoami)
 # This allows the toggle scripts to work smoothly
 if ! sudo tee "$SUDOERS_FILE" > /dev/null <<CONTENTS
 $USERNAME ALL=(ALL) NOPASSWD: /usr/bin/tlp
-$USERNAME ALL=(ALL) NOPASSWD: /home/$USERNAME/Peitharchy/scripts/toggle-performance.sh
+$USERNAME ALL=(ALL) NOPASSWD: $SCRIPT_DIR/scripts/toggle-performance.sh
 $USERNAME ALL=(ALL) NOPASSWD: /home/$USERNAME/.local/bin/toggle-performance.sh
 $USERNAME ALL=(ALL) NOPASSWD: /usr/local/bin/auto-cpufreq
 $USERNAME ALL=(ALL) NOPASSWD: /usr/bin/auto-cpufreq
