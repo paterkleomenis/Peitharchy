@@ -253,9 +253,9 @@ fi
 
 # Install Kora icon theme
 print_step "Installing Kora icon theme..."
-if [ -f "$SCRIPT_DIR/kora-1-7-2.tar.xz" ]; then
+if [ -f "$SCRIPT_DIR/assets/kora-1-7-2.tar.xz" ]; then
     mkdir -p ~/.local/share/icons
-    tar -xf "$SCRIPT_DIR/kora-1-7-2.tar.xz" -C ~/.local/share/icons/
+    tar -xf "$SCRIPT_DIR/assets/kora-1-7-2.tar.xz" -C ~/.local/share/icons/
     print_step "Kora icon theme installed successfully!"
 else
     print_warning "kora-1-7-2.tar.xz not found in $SCRIPT_DIR. Skipping icon theme installation."
@@ -286,8 +286,8 @@ fi
 
 # Copy Hyprland configuration files
 print_step "Copying Hyprland configuration files..."
-if [ -d "$SCRIPT_DIR/hyprland" ]; then
-    cp -r "$SCRIPT_DIR/hyprland"/* ~/.config/hypr/
+if [ -d "$SCRIPT_DIR/configs/hypr" ]; then
+    cp -r "$SCRIPT_DIR/configs/hypr"/* ~/.config/hypr/
 
     # Update hyprpaper.conf with current user's home directory
     if [ -f ~/.config/hypr/hyprpaper.conf ]; then
@@ -348,9 +348,9 @@ fi
 install_wifi_menu
 
 # Copy waybar config if it exists
-if [ -f "$SCRIPT_DIR/config" ]; then
+if [ -f "$SCRIPT_DIR/configs/waybar/config" ]; then
     print_step "Copying Waybar config..."
-    cp "$SCRIPT_DIR/config" ~/.config/waybar/config
+    cp "$SCRIPT_DIR/configs/waybar/config" ~/.config/waybar/config
 
     # Update waybar config to use ~/.local/bin for scripts
     sed -i 's|~/.config/waybar/scripts/|~/.local/bin/|g' ~/.config/waybar/config
@@ -358,21 +358,21 @@ if [ -f "$SCRIPT_DIR/config" ]; then
 fi
 
 # Copy waybar style if it exists
-if [ -f "$SCRIPT_DIR/style.css" ]; then
+if [ -f "$SCRIPT_DIR/configs/waybar/style.css" ]; then
     print_step "Copying Waybar style..."
-    cp "$SCRIPT_DIR/style.css" ~/.config/waybar/style.css
+    cp "$SCRIPT_DIR/configs/waybar/style.css" ~/.config/waybar/style.css
 fi
 
 # Copy rofi config if it exists
-if [ -f "$SCRIPT_DIR/rofi/config.rasi" ]; then
+if [ -f "$SCRIPT_DIR/configs/rofi/config.rasi" ]; then
     print_step "Copying Rofi config..."
-    cp "$SCRIPT_DIR/rofi/config.rasi" ~/.config/rofi/config.rasi
+    cp "$SCRIPT_DIR/configs/rofi/config.rasi" ~/.config/rofi/config.rasi
 fi
 
 # Copy kitty config if it exists
-if [ -f "$SCRIPT_DIR/kitty/kitty.conf" ]; then
+if [ -f "$SCRIPT_DIR/configs/kitty/kitty.conf" ]; then
     print_step "Copying Kitty terminal config..."
-    cp "$SCRIPT_DIR/kitty/kitty.conf" ~/.config/kitty/kitty.conf
+    cp "$SCRIPT_DIR/configs/kitty/kitty.conf" ~/.config/kitty/kitty.conf
     print_step "Kitty config copied successfully!"
 else
     print_warning "Kitty config not found. Skipping kitty configuration."
@@ -380,8 +380,8 @@ fi
 
 # Copy wallpapers
 print_step "Copying wallpapers..."
-if [ -d "$SCRIPT_DIR/wallpapers" ]; then
-    cp -r "$SCRIPT_DIR/wallpapers"/* ~/Pictures/wallpapers/
+if [ -d "$SCRIPT_DIR/assets/wallpapers" ]; then
+    cp -r "$SCRIPT_DIR/assets/wallpapers"/* ~/Pictures/wallpapers/
     print_step "Wallpapers copied successfully!"
 else
     print_warning "Wallpapers directory not found. Skipping wallpapers."
@@ -412,8 +412,8 @@ if [[ $INSTALL_GTK =~ ^[Yy]$ ]]; then
     print_step "Installing GTK configuration files..."
 
     # Copy GTK 3.0 configs
-    if [ -d "$SCRIPT_DIR/gtk-3.0" ]; then
-        cp -r "$SCRIPT_DIR/gtk-3.0"/* ~/.config/gtk-3.0/
+    if [ -d "$SCRIPT_DIR/configs/gtk-3.0" ]; then
+        cp -r "$SCRIPT_DIR/configs/gtk-3.0"/* ~/.config/gtk-3.0/
 
         # Update bookmarks with current user's home directory
         if [ -f ~/.config/gtk-3.0/bookmarks ]; then
@@ -426,8 +426,8 @@ if [[ $INSTALL_GTK =~ ^[Yy]$ ]]; then
     fi
 
     # Copy GTK 4.0 configs
-    if [ -d "$SCRIPT_DIR/gtk-4.0" ]; then
-        cp -r "$SCRIPT_DIR/gtk-4.0"/* ~/.config/gtk-4.0/
+    if [ -d "$SCRIPT_DIR/configs/gtk-4.0" ]; then
+        cp -r "$SCRIPT_DIR/configs/gtk-4.0"/* ~/.config/gtk-4.0/
         print_step "GTK 4.0 configs copied!"
     else
         print_warning "gtk-4.0 directory not found in source. Skipping."
@@ -453,9 +453,9 @@ sudo systemctl enable greetd
 
 # Configure tuigreet
 print_step "Configuring tuigreet..."
-if [ -f "$SCRIPT_DIR/greetd/config.toml" ]; then
+if [ -f "$SCRIPT_DIR/configs/greetd/config.toml" ]; then
     sudo mkdir -p /etc/greetd
-    sudo cp "$SCRIPT_DIR/greetd/config.toml" /etc/greetd/config.toml
+    sudo cp "$SCRIPT_DIR/configs/greetd/config.toml" /etc/greetd/config.toml
     print_step "Greetd config copied from provided file!"
 else
     print_warning "greetd/config.toml not found. Creating default config..."
