@@ -584,15 +584,21 @@ echo ""
 print_info "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo ""
 
-# Configure sudoers for passwordless power management
-print_step "Configuring passwordless sudo for power management..."
-SUDOERS_FILE="/etc/sudoers.d/peitharchy"
-USERNAME=$(whoami)
+# Optional laptop power optimization
+if [ -d /sys/class/power_supply/BAT0 ] || [ -d /sys/class/power_supply/BAT1 ]; then
+    print_step "Laptop detected."
+    read -p "Enable laptop power optimization (TLP + auto-cpufreq)? (Y/n): " -r
+    ENABLE_LAPTOP_OPT=${REPLY:-Y}
 
-# Create the file content
-# We allow the user to run tlp and auto-cpufreq without password
-# This allows the toggle scripts to work smoothly
-if ! sudo tee "$SUDOERS_FILE" > /dev/null <<CONTENTS
+    if [[ $ENABLE_LAPTOP_OPT =~ ^[Yy]$ ]]; then
+        # Configure sudoers for passwordless power management
+        print_step "Configuring passwordless sudo for power management..."
+        SUDOERS_FILE="/etc/sudoers.d/peitharchy"
+        USERNAME=$(whoami)
+
+        # We allow the user to run tlp and auto-cpufreq without password
+        # This allows the toggle scripts to work smoothly
+        if ! sudo tee "$SUDOERS_FILE" > /dev/null <<CONTENTS
 $USERNAME ALL=(ALL) NOPASSWD: /usr/bin/tlp
 $USERNAME ALL=(ALL) NOPASSWD: $SCRIPT_DIR/scripts/toggle-performance.sh
 $USERNAME ALL=(ALL) NOPASSWD: /home/$USERNAME/.local/bin/toggle-performance.sh
@@ -605,27 +611,26 @@ $USERNAME ALL=(ALL) NOPASSWD: /usr/bin/systemctl disable auto-cpufreq
 $USERNAME ALL=(ALL) NOPASSWD: /usr/bin/systemctl enable --now tlp
 $USERNAME ALL=(ALL) NOPASSWD: /usr/bin/systemctl disable --now tlp
 CONTENTS
-then
-    print_warning "Failed to write to $SUDOERS_FILE. You may need to enter password for power modes."
-else
-    # Set correct permissions (critical for sudoers files)
-    sudo chmod 440 "$SUDOERS_FILE"
-    print_info "Passwordless sudo configured for TLP and auto-cpufreq."
-fi
+        then
+            print_warning "Failed to write to $SUDOERS_FILE. You may need to enter password for power modes."
+        else
+            # Set correct permissions (critical for sudoers files)
+            sudo chmod 440 "$SUDOERS_FILE"
+            print_info "Passwordless sudo configured for TLP and auto-cpufreq."
+        fi
 
+        # Enable TLP service
+        print_step "Enabling TLP service..."
+        sudo systemctl enable --now tlp
+        print_info "TLP service enabled"
 
-# Check if this is a laptop (has battery)
-if [ -d /sys/class/power_supply/BAT0 ] || [ -d /sys/class/power_supply/BAT1 ]; then
-    print_step "Laptop detected, configuring power management..."
-    # Enable TLP service
-    print_step "Enabling TLP service..."
-    sudo systemctl enable --now tlp
-    print_info "TLP service enabled"
-
-    # Disable TLP CPU management by default (let auto-cpufreq handle it)
-    print_step "Configuring TLP to not manage CPU (auto-cpufreq will handle it)..."
-    sudo "$SCRIPT_DIR/scripts/toggle-performance.sh" disable_cpu
-    print_info "TLP CPU disabled, auto-cpufreq active"
+        # Disable TLP CPU management by default (let auto-cpufreq handle it)
+        print_step "Configuring TLP to not manage CPU (auto-cpufreq will handle it)..."
+        sudo "$SCRIPT_DIR/scripts/toggle-performance.sh" disable_cpu
+        print_info "TLP CPU disabled, auto-cpufreq active"
+    else
+        print_info "Skipping laptop power optimization setup."
+    fi
 else
     print_info "No battery detected, skipping laptop power management setup"
 fi
