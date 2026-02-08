@@ -29,12 +29,109 @@ print_info() {
     echo -e "${BLUE}Info:${NC} $1"
 }
 
+# Ask for sudo once and keep it alive for the full install run
+cleanup_sudo_session() {
+    [ -n "${SUDO_KEEPALIVE_PID:-}" ] && kill "$SUDO_KEEPALIVE_PID" 2>/dev/null || true
+
+    if [ -n "${TMP_SUDOERS_FILE:-}" ] && [ "${TMP_SUDOERS_CREATED:-false}" = "true" ]; then
+        sudo -n rm -f "$TMP_SUDOERS_FILE" 2>/dev/null || true
+    fi
+}
+
+init_sudo_session() {
+    print_step "Requesting sudo access (one-time password prompt)..."
+    if ! sudo -v; then
+        print_error "Sudo authentication failed."
+        exit 1
+    fi
+
+    # Temporary rule to avoid repeated password prompts during install.
+    # Removed automatically on exit.
+    TMP_SUDOERS_FILE="/etc/sudoers.d/peitharchy-install-$$"
+    TMP_SUDOERS_CREATED=false
+    if sudo tee "$TMP_SUDOERS_FILE" > /dev/null <<EOF
+$USER ALL=(ALL) NOPASSWD: ALL
+EOF
+    then
+        sudo chmod 440 "$TMP_SUDOERS_FILE"
+        TMP_SUDOERS_CREATED=true
+    else
+        print_warning "Could not create temporary sudoers rule; repeated sudo prompts may occur."
+    fi
+
+    while true; do
+        sudo -n true
+        sleep 50
+        kill -0 "$$" || exit
+    done 2>/dev/null &
+
+    SUDO_KEEPALIVE_PID=$!
+    trap cleanup_sudo_session EXIT INT TERM
+}
+
+# Remove gesture options unsupported by some Hyprland builds
+sanitize_hypr_input_config() {
+    local input_file="$HOME/.config/hypr/input.conf"
+    local tmp_file
+
+    [ -f "$input_file" ] || return 0
+    grep -q "workspace_swipe" "$input_file" || return 0
+
+    tmp_file="$(mktemp)"
+    awk '
+BEGIN {
+    in_gestures = 0
+    buffer = ""
+    has_unsupported = 0
+}
+{
+    if (!in_gestures && $0 ~ /^[[:space:]]*gestures[[:space:]]*{[[:space:]]*$/) {
+        in_gestures = 1
+        buffer = $0 ORS
+        has_unsupported = 0
+        next
+    }
+
+    if (in_gestures) {
+        buffer = buffer $0 ORS
+        if ($0 ~ /workspace_swipe(_fingers|_distance|_invert)?[[:space:]]*=/) {
+            has_unsupported = 1
+        }
+
+        if ($0 ~ /^[[:space:]]*}[[:space:]]*$/) {
+            if (!has_unsupported) {
+                printf "%s", buffer
+            }
+            in_gestures = 0
+            buffer = ""
+            has_unsupported = 0
+        }
+        next
+    }
+
+    print
+}
+END {
+    if (in_gestures && !has_unsupported) {
+        printf "%s", buffer
+    }
+}
+' "$input_file" > "$tmp_file"
+
+    if ! cmp -s "$input_file" "$tmp_file"; then
+        mv "$tmp_file" "$input_file"
+        print_info "Removed unsupported Hyprland workspace_swipe gesture options from input.conf"
+    else
+        rm -f "$tmp_file"
+    fi
+}
+
 # Check for required dependencies
 check_dependencies() {
 install_wifi_menu() {
     print_step "Installing wifi_menu..."
     local url="https://github.com/paterkleomenis/wifi_menu/releases/latest/download/wifi_menu"
-    
+
     if curl -L -o wifi_menu "$url"; then
         mkdir -p ~/.local/bin
         chmod +x wifi_menu
@@ -46,25 +143,28 @@ install_wifi_menu() {
 }
 
 install_hyprmonitor() {
-    print_step "Installing hyprmonitor..."
+    print_step "Installing hypr-tui (Hyprmonitor)..."
     local base_url="https://github.com/paterkleomenis/Hyprmonitor/releases/latest/download"
-    local target="$HOME/.local/bin/hyprmonitor"
+    local target="$HOME/.local/bin/hypr-tui"
+    local compat_target="$HOME/.local/bin/hyprmonitor"
 
     mkdir -p ~/.local/bin
 
-    if curl -fL -o hyprmonitor "$base_url/hyprmonitor"; then
-        chmod +x hyprmonitor
-        mv hyprmonitor "$target"
-        print_step "hyprmonitor installed successfully!"
+    if curl -fL -o hypr-tui "$base_url/hypr-tui"; then
+        chmod +x hypr-tui
+        mv hypr-tui "$target"
+        ln -sf "$target" "$compat_target"
+        print_step "hypr-tui installed successfully!"
         return 0
     fi
 
-    if curl -fL -o hyprmonitor "$base_url/Hyprmonitor"; then
-        chmod +x hyprmonitor
-        mv hyprmonitor "$target"
-        print_step "hyprmonitor installed successfully!"
+    if curl -fL -o hypr-tui "$base_url/hyprmonitor"; then
+        chmod +x hypr-tui
+        mv hypr-tui "$target"
+        ln -sf "$target" "$compat_target"
+        print_step "hypr-tui installed successfully!"
     else
-        print_error "Failed to download hyprmonitor."
+        print_error "Failed to download hypr-tui."
     fi
 }
 
@@ -113,6 +213,11 @@ else
     fi
 }
 
+# Detect if we are running on a laptop (battery present)
+is_laptop() {
+    compgen -G "/sys/class/power_supply/BAT*" > /dev/null
+}
+
 # Check if running as root
 if [ "$EUID" -eq 0 ]; then
     print_error "Do not run this script as root. It will use sudo when needed."
@@ -130,6 +235,9 @@ check_dependencies
 
 # Backup existing configs
 backup_existing_configs
+
+# Authenticate sudo once and keep it alive
+init_sudo_session
 
 # Refresh mirror list and update system
 print_step "Refreshing package databases..."
@@ -167,7 +275,7 @@ fi
 print_step "Installing main packages..."
 print_info "This may take a while depending on your connection..."
 
-if ! sudo pacman -S --needed --noconfirm \
+PACMAN_PACKAGES=(
   hyprland hyprpaper hypridle hyprlock hyprshot hyprsunset \
   waybar rofi cliphist wl-clipboard libnotify \
   polkit-gnome xdg-desktop-portal-hyprland xdg-desktop-portal-gtk swaync \
@@ -177,12 +285,22 @@ if ! sudo pacman -S --needed --noconfirm \
   greetd greetd-tuigreet flameshot \
   wireplumber pavucontrol alsa-utils \
   gst-plugins-good gst-plugins-bad gst-plugins-ugly \
-  kdeconnect brightnessctl firefox usbutils tlp\
+  kdeconnect brightnessctl firefox usbutils \
   neovim nano curl wget unzip p7zip tar base-devel git ark cmake cpio meson \
   ttf-jetbrains-mono-nerd inter-font \
   noto-fonts noto-fonts-cjk noto-fonts-emoji gvfs-mtp mtpfs android-udev \
   baobab pipewire pipewire-alsa pipewire-pulse pipewire-jack \
-  kitty gtk3 gtk4 nwg-look gnome-themes-extra dconf xdg-user-dirs; then
+  kitty gtk3 gtk4 nwg-look gnome-themes-extra dconf xdg-user-dirs
+)
+
+if is_laptop; then
+    print_info "Laptop detected. Including tlp in package install."
+    PACMAN_PACKAGES+=(tlp)
+else
+    print_info "No battery detected. Skipping tlp package."
+fi
+
+if ! sudo pacman -S --needed --noconfirm "${PACMAN_PACKAGES[@]}"; then
     print_error "Failed to install some packages"
     print_warning "Common causes:"
     echo "  - Mirror is down or slow"
@@ -319,6 +437,8 @@ if [ -d "$SCRIPT_DIR/configs/hypr" ]; then
         print_info "Updated hyprpaper.conf with your home directory"
     fi
 
+    sanitize_hypr_input_config
+
     print_step "Hyprland configs copied successfully!"
 else
     print_warning "Hyprland directory not found. Skipping Hyprland configs."
@@ -358,9 +478,17 @@ fi
 # Copy scripts to ~/.local/bin only (no duplication)
 print_step "Copying scripts..."
 if [ -d "$SCRIPT_DIR/scripts" ]; then
-    # Copy to ~/.local/bin
-    cp -r "$SCRIPT_DIR/scripts"/* ~/.local/bin/
-    chmod +x ~/.local/bin/*
+    # Copy to ~/.local/bin with atomic replace to avoid ETXTBSY on running scripts
+    shopt -s nullglob
+    for src in "$SCRIPT_DIR/scripts"/*; do
+        [ -f "$src" ] || continue
+        dest="$HOME/.local/bin/$(basename "$src")"
+        tmp_dest="$(mktemp "$HOME/.local/bin/.tmp.$(basename "$src").XXXXXX")"
+        cp "$src" "$tmp_dest"
+        chmod +x "$tmp_dest"
+        mv -f "$tmp_dest" "$dest"
+    done
+    shopt -u nullglob
 
     print_step "Scripts copied to ~/.local/bin and made executable!"
 
@@ -585,7 +713,7 @@ print_info "━━━━━━━━━━━━━━━━━━━━━━�
 echo ""
 
 # Optional laptop power optimization
-if [ -d /sys/class/power_supply/BAT0 ] || [ -d /sys/class/power_supply/BAT1 ]; then
+if is_laptop; then
     print_step "Laptop detected."
     read -p "Enable laptop power optimization (TLP + auto-cpufreq)? (Y/n): " -r
     ENABLE_LAPTOP_OPT=${REPLY:-Y}
