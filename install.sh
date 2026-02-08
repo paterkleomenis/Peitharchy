@@ -610,44 +610,46 @@ else
     print_info "Your custom GTK theme will be preserved"
 fi
 
-# Enable greetd service
-print_step "Enabling greetd service..."
-sudo systemctl enable greetd
-
-# Configure tuigreet
-print_step "Configuring tuigreet..."
+# Configure and enable greetd
+print_step "Configuring greetd..."
 EXISTING_GREETD_COMMAND=""
 if [ -f /etc/greetd/config.toml ]; then
     EXISTING_GREETD_COMMAND="$(awk -F' = ' '/^command = / {print $2; exit}' /etc/greetd/config.toml)"
-    if [ -n "$EXISTING_GREETD_COMMAND" ]; then
+fi
+
+# Ensure the greeter user exists.
+if ! id -u greeter >/dev/null 2>&1; then
+    print_warning "System user 'greeter' not found. Creating it..."
+    sudo useradd -r -M -s /usr/bin/nologin greeter
+fi
+
+DEFAULT_GREETD_COMMAND="\"agreety --cmd 'start-hyprland >/dev/null 2>&1'\""
+if command -v tuigreet >/dev/null 2>&1; then
+    DEFAULT_GREETD_COMMAND="\"tuigreet --time --remember --user-menu --sessions /usr/share/wayland-sessions:/usr/share/xsessions --cmd 'start-hyprland >/dev/null 2>&1'\""
+fi
+
+SELECTED_GREETD_COMMAND="$DEFAULT_GREETD_COMMAND"
+if [ -n "$EXISTING_GREETD_COMMAND" ]; then
+    if [[ "$EXISTING_GREETD_COMMAND" == *tuigreet* ]] && ! command -v tuigreet >/dev/null 2>&1; then
+        print_warning "Existing greetd config uses tuigreet, but tuigreet is not installed. Replacing command."
+    elif [[ "$EXISTING_GREETD_COMMAND" == *agreety* ]] && ! command -v agreety >/dev/null 2>&1; then
+        print_warning "Existing greetd config uses agreety, but agreety is not installed. Replacing command."
+    else
+        SELECTED_GREETD_COMMAND="$EXISTING_GREETD_COMMAND"
         print_info "Detected existing greetd session command, preserving it"
     fi
 fi
 
-if [ -f "$SCRIPT_DIR/configs/greetd/config.toml" ]; then
-    sudo mkdir -p /etc/greetd
-    sudo cp "$SCRIPT_DIR/configs/greetd/config.toml" /etc/greetd/config.toml
-    print_step "Greetd config copied from provided file!"
-else
-    print_warning "greetd/config.toml not found. Creating default config..."
-    sudo mkdir -p /etc/greetd
-    sudo tee /etc/greetd/config.toml > /dev/null <<EOF
+sudo mkdir -p /etc/greetd
+sudo tee /etc/greetd/config.toml > /dev/null <<EOF
 [terminal]
 vt = 1
 
 [default_session]
-command = "tuigreet --cmd 'start-hyprland >/dev/null 2>&1'"
+command = $SELECTED_GREETD_COMMAND
 user = "greeter"
 EOF
-fi
-
-if [ -n "$EXISTING_GREETD_COMMAND" ]; then
-    sudo awk -v cmd="$EXISTING_GREETD_COMMAND" '
-        /^command = / { print "command = " cmd; next }
-        { print }
-    ' /etc/greetd/config.toml | sudo tee /etc/greetd/config.toml > /dev/null
-    print_info "Restored existing greetd session command in /etc/greetd/config.toml"
-fi
+print_step "Greetd config written to /etc/greetd/config.toml"
 
 # Configure PAM for greetd
 print_step "Configuring PAM for greetd..."
@@ -663,7 +665,17 @@ auth       optional     pam_gnome_keyring.so
 session    optional     pam_gnome_keyring.so auto_start
 EOF
 
-# Disable other display managers if they exist
+# Enable and start greetd only after configuration is valid
+print_step "Enabling and starting greetd..."
+sudo systemctl enable --now greetd
+
+if ! systemctl is-active --quiet greetd; then
+    print_error "greetd failed to start. Keeping other display managers unchanged."
+    print_info "Inspect logs with: sudo journalctl -u greetd -b --no-pager | tail -n 100"
+    exit 1
+fi
+
+# Disable other display managers only after greetd is running
 for dm in gdm sddm lightdm lxdm; do
     if systemctl is-enabled "$dm" &> /dev/null; then
         print_warning "Disabling $dm..."
