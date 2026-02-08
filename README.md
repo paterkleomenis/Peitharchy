@@ -17,8 +17,10 @@ Peitharchy is a complete Hyprland desktop environment setup featuring:
 - GTK 3.0/4.0 theming with Kora icon pack
 - Greetd with tuigreet login manager
 - Multi-language keyboard support
+- Touchpad workspace gestures enabled by default (laptop-friendly)
 - Screenshot tools (hyprshot and flameshot)
 - Night light integration via hyprsunset
+- Automatic `hyprpm` plugin refresh (`hyprexpo` + `hyprgrass`) when Hyprland package version changes
 - Multiple terminal options (kitty, ghostty)
 
 ## Features
@@ -132,6 +134,7 @@ The script will:
 - Install Kora icon theme
 - Create necessary directories
 - Copy all configuration files to appropriate locations
+- Install startup automation for `hyprpm` plugin maintenance
 - Ask about GTK theme installation (keeps custom themes if you decline)
 - Configure GTK themes and settings
 - Set up greetd login manager
@@ -143,7 +146,7 @@ The script will:
 reboot
 ```
 
-5. At the login screen (tuigreet), select Hyprland and log in
+5. At the login screen (tuigreet), log in and it will launch Hyprland via `start-hyprland`
 
 ## Configuration Locations
 
@@ -426,6 +429,7 @@ Peitharchy/
 │   └── config.rasi            # Rofi launcher config
 ├── scripts/
 │   ├── clipboard_menu.sh      # Clipboard manager script
+│   ├── hyprpm-auto.sh         # Auto-refresh hypr plugins on Hyprland updates
 │   ├── hyprsunset.sh          # Night light control script
 │   ├── power-menu.sh          # Power menu script
 │   └── toggle-layout.sh       # Keyboard layout switcher

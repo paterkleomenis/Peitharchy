@@ -36,11 +36,35 @@ install_wifi_menu() {
     local url="https://github.com/paterkleomenis/wifi_menu/releases/latest/download/wifi_menu"
     
     if curl -L -o wifi_menu "$url"; then
+        mkdir -p ~/.local/bin
         chmod +x wifi_menu
-        sudo mv wifi_menu /usr/local/bin/
+        mv wifi_menu ~/.local/bin/wifi_menu
         print_step "wifi_menu installed successfully!"
     else
         print_error "Failed to download wifi_menu."
+    fi
+}
+
+install_hyprmonitor() {
+    print_step "Installing hyprmonitor..."
+    local base_url="https://github.com/paterkleomenis/Hyprmonitor/releases/latest/download"
+    local target="$HOME/.local/bin/hyprmonitor"
+
+    mkdir -p ~/.local/bin
+
+    if curl -fL -o hyprmonitor "$base_url/hyprmonitor"; then
+        chmod +x hyprmonitor
+        mv hyprmonitor "$target"
+        print_step "hyprmonitor installed successfully!"
+        return 0
+    fi
+
+    if curl -fL -o hyprmonitor "$base_url/Hyprmonitor"; then
+        chmod +x hyprmonitor
+        mv hyprmonitor "$target"
+        print_step "hyprmonitor installed successfully!"
+    else
+        print_error "Failed to download hyprmonitor."
     fi
 }
 
@@ -150,7 +174,7 @@ if ! sudo pacman -S --needed --noconfirm \
   playerctl jq grim slurp \
   nautilus network-manager-applet blueman \
   gnome-keyring libsecret polkit gcr \
-  greetd flameshot \
+  greetd greetd-tuigreet flameshot \
   wireplumber pavucontrol alsa-utils \
   gst-plugins-good gst-plugins-bad gst-plugins-ugly \
   kdeconnect brightnessctl firefox usbutils tlp\
@@ -303,9 +327,10 @@ fi
 # Setup Hyprland Plugins
 print_step "Setting up Hyprland Plugins..."
 if command -v hyprpm &> /dev/null; then
+    HYPR_PLUGINS=(hyprexpo hyprgrass)
     print_info "Updating hyprpm headers (this may take a while)..."
     if hyprpm update; then
-        print_info "Installing hyprexpo plugin..."
+        print_info "Installing Hyprland plugin repository..."
         # Check if already added
         if ! hyprpm list | grep -q "hyprland-plugins"; then
              if hyprpm add https://github.com/hyprwm/hyprland-plugins; then
@@ -315,12 +340,14 @@ if command -v hyprpm &> /dev/null; then
              fi
         fi
 
-        # Enable hyprexpo
-        if hyprpm enable hyprexpo; then
-            print_step "hyprexpo plugin enabled successfully!"
-        else
-            print_error "Failed to enable hyprexpo plugin."
-        fi
+        # Enable selected plugins
+        for plugin in "${HYPR_PLUGINS[@]}"; do
+            if hyprpm enable "$plugin"; then
+                print_step "$plugin plugin enabled successfully!"
+            else
+                print_warning "Failed to enable $plugin plugin."
+            fi
+        done
     else
         print_error "Failed to update hyprpm headers."
     fi
@@ -340,12 +367,20 @@ if [ -d "$SCRIPT_DIR/scripts" ]; then
     # Generate GPU environment config
     print_step "Detecting GPU and generating configuration..."
     "$SCRIPT_DIR/scripts/generate-gpu-env.sh"
+
+    # Initialize Hyprland plugins and remember current Hyprland package version
+    if command -v hyprpm &> /dev/null && [ -x ~/.local/bin/hyprpm-auto.sh ]; then
+        print_step "Initializing automatic Hyprland plugin maintenance..."
+        ~/.local/bin/hyprpm-auto.sh --force
+    fi
 else
     print_warning "Scripts directory not found. Skipping scripts."
 fi
 
 # Install wifi_menu
 install_wifi_menu
+# Install hyprmonitor
+install_hyprmonitor
 
 # Copy waybar config if it exists
 if [ -f "$SCRIPT_DIR/configs/waybar/config" ]; then
@@ -453,6 +488,14 @@ sudo systemctl enable greetd
 
 # Configure tuigreet
 print_step "Configuring tuigreet..."
+EXISTING_GREETD_COMMAND=""
+if [ -f /etc/greetd/config.toml ]; then
+    EXISTING_GREETD_COMMAND="$(awk -F' = ' '/^command = / {print $2; exit}' /etc/greetd/config.toml)"
+    if [ -n "$EXISTING_GREETD_COMMAND" ]; then
+        print_info "Detected existing greetd session command, preserving it"
+    fi
+fi
+
 if [ -f "$SCRIPT_DIR/configs/greetd/config.toml" ]; then
     sudo mkdir -p /etc/greetd
     sudo cp "$SCRIPT_DIR/configs/greetd/config.toml" /etc/greetd/config.toml
@@ -465,9 +508,17 @@ else
 vt = 1
 
 [default_session]
-command = "tuigreet --cmd Hyprland"
+command = "tuigreet --cmd 'start-hyprland >/dev/null 2>&1'"
 user = "greeter"
 EOF
+fi
+
+if [ -n "$EXISTING_GREETD_COMMAND" ]; then
+    sudo awk -v cmd="$EXISTING_GREETD_COMMAND" '
+        /^command = / { print "command = " cmd; next }
+        { print }
+    ' /etc/greetd/config.toml | sudo tee /etc/greetd/config.toml > /dev/null
+    print_info "Restored existing greetd session command in /etc/greetd/config.toml"
 fi
 
 # Configure PAM for greetd

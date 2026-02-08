@@ -125,14 +125,13 @@
       "max-length": 36
     },
     "network": {
-        "interface": "wl*",
         "format-wifi": "{icon}",
         "format-ethernet": "󰈀",
         "format-disconnected": "󰤮",
         "format-icons": ["󰤯", "󰤟", "󰤢", "󰤥", "󰤨"],
         "tooltip-format": "{essid} ({signalStrength}%)",
         "on-click": "kitty --title 'Wi-Fi Menu' ~/.local/bin/wifi_menu",
-        "on-click-right": "nm-connection-editor"
+        "on-click-right": "kitty --title 'Wi-Fi Menu' ~/.local/bin/wifi_menu"
     },
     "bluetooth": {
         "format": "󰂯",
