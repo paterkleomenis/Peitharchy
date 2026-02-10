@@ -83,7 +83,7 @@ Peitharchy is a complete Hyprland desktop environment setup featuring:
 - greetd, greetd-tuigreet, flameshot
 - wireplumber, pavucontrol, alsa-utils
 - pipewire, pipewire-alsa, pipewire-pulse, pipewire-jack
-- kdeconnect, brightnessctl
+- brightnessctl
 - kitty, neovim, nano
 - ark (archive manager), p7zip, unzip, tar
 - ttf-jetbrains-mono-nerd, inter-font

@@ -13,6 +13,28 @@ MODE_FILE="$USER_HOME/.cache/cpu_mode"
 TLP_CONF="/etc/tlp.conf"
 mkdir -p "$(dirname "$MODE_FILE")"
 
+find_auto_cpufreq() {
+    if command -v auto-cpufreq >/dev/null 2>&1; then
+        command -v auto-cpufreq
+        return 0
+    fi
+    if [[ -x /usr/local/bin/auto-cpufreq ]]; then
+        printf '%s\n' "/usr/local/bin/auto-cpufreq"
+        return 0
+    fi
+    if [[ -x /usr/bin/auto-cpufreq ]]; then
+        printf '%s\n' "/usr/bin/auto-cpufreq"
+        return 0
+    fi
+    return 1
+}
+
+auto_cpufreq_service_exists() {
+    systemctl list-unit-files auto-cpufreq.service --no-legend 2>/dev/null | grep -q '^auto-cpufreq\.service'
+}
+
+AUTO_CPUFREQ_BIN="$(find_auto_cpufreq || true)"
+
 # --- NOTIFICATION HELPER ---
 # Handles notify-send properly when running under sudo
 send_notification() {
@@ -59,7 +81,9 @@ case "$COMMAND" in
         fi
 
         if [[ "$CURRENT_MODE" == "powersave" ]]; then
-            sudo /usr/local/bin/auto-cpufreq --force performance
+            if [[ -n "$AUTO_CPUFREQ_BIN" ]]; then
+                sudo "$AUTO_CPUFREQ_BIN" --force performance
+            fi
             hyprctl keyword misc:vfr false
             sudo "$0" internal_disable_wifi
             sudo "$0" internal_disable_audio
@@ -68,7 +92,9 @@ case "$COMMAND" in
             echo "performance" > "$MODE_FILE"
             send_notification "Power Mode" "Switched to Performance mode ⚡"
         else
-            sudo /usr/local/bin/auto-cpufreq --force powersave
+            if [[ -n "$AUTO_CPUFREQ_BIN" ]]; then
+                sudo "$AUTO_CPUFREQ_BIN" --force powersave
+            fi
             hyprctl keyword misc:vfr true
             sudo "$0" internal_enable_wifi
             sudo "$0" internal_enable_audio
@@ -86,8 +112,10 @@ case "$COMMAND" in
 
     "enable_cpu")
         # Enable TLP CPU = disable auto-cpufreq
-        systemctl stop auto-cpufreq
-        systemctl disable auto-cpufreq
+        if auto_cpufreq_service_exists; then
+            systemctl stop auto-cpufreq >/dev/null 2>&1 || true
+            systemctl disable auto-cpufreq >/dev/null 2>&1 || true
+        fi
         set_param "CPU_SCALING_GOVERNOR_ON_AC" "performance"
         set_param "CPU_SCALING_GOVERNOR_ON_BAT" "powersave"
         set_param "CPU_ENERGY_PERF_POLICY_ON_AC" "balance_performance"
@@ -113,8 +141,10 @@ case "$COMMAND" in
         set_param "CPU_MAX_PERF_ON_AC" "keep"
         set_param "CPU_MAX_PERF_ON_BAT" "keep"
         apply_tlp
-        systemctl enable auto-cpufreq
-        systemctl start auto-cpufreq
+        if [[ -n "$AUTO_CPUFREQ_BIN" ]] && auto_cpufreq_service_exists; then
+            systemctl enable auto-cpufreq >/dev/null 2>&1 || true
+            systemctl start auto-cpufreq >/dev/null 2>&1 || true
+        fi
         send_notification "CPU Management" "auto-cpufreq now controls CPU 🔄"
         ;;
 

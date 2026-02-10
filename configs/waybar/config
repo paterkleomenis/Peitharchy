@@ -1,6 +1,7 @@
 [
   {
-    "layer": "bottom",
+    "layer": "top",
+    "exclusive": true,
     "position": "top",
     "height": 46,
     "spacing": 4,
@@ -119,10 +120,8 @@
       "on-click": "playerctl play-pause",
       "on-click-right": "playerctl next",
       "on-click-middle": "playerctl previous",
-      "interval": 0,
       "on-scroll-up": "playerctld shift",
-      "on-scroll-down": "playerctld unshift",
-      "max-length": 36
+      "on-scroll-down": "playerctld unshift"
     },
     "network": {
         "format-wifi": "{icon}",
@@ -148,7 +147,7 @@
     },
     "wireplumber": {
       "format": "{icon} {volume}%",
-      "format-muted": "󰝟    Muted",
+      "format-muted": "󰝟 Muted",
       "format-icons": {
         "default": [
           "󰕿",
@@ -156,7 +155,7 @@
           "󰕾"
         ]
       },
-      "on-click": "killall pavucontrol  || pavucontrol",
+      "on-click": "killall pavucontrol || pavucontrol",
       "on-click-right": "wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle"
     },
 

@@ -70,7 +70,7 @@ window#waybar {
     font-size: 13px;
 }
 
-#custom-media {
+#mpris {
     background: rgba(24, 24, 24, 0.3);
     color: #ffffff;
     border-radius: 16px;
@@ -80,22 +80,22 @@ window#waybar {
     font-weight: 500;
 }
 
-#custom-media.playing {
+#mpris.playing {
     background: rgba(24, 24, 24, 0.3);
     color: #ffffff;
 }
 
-#custom-media.paused {
+#mpris.paused {
     background: rgba(24, 24, 24, 0.3);
     color: rgba(255, 255, 255, 0.8);
 }
 
-#custom-media.stopped {
+#mpris.stopped {
     background: rgba(24, 24, 24, 0.3);
     color: rgba(255, 255, 255, 0.6);
 }
 
-#custom-media.no-media {
+#mpris.empty {
     opacity: 0;
     padding: 0;
     margin: 0;

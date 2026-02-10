@@ -29,6 +29,80 @@ print_info() {
     echo -e "${BLUE}Info:${NC} $1"
 }
 
+command_exists() {
+    command -v "$1" >/dev/null 2>&1
+}
+
+resolve_auto_cpufreq_binary() {
+    if command_exists auto-cpufreq; then
+        command -v auto-cpufreq
+        return 0
+    fi
+    if [ -x /usr/local/bin/auto-cpufreq ]; then
+        printf '%s\n' "/usr/local/bin/auto-cpufreq"
+        return 0
+    fi
+    if [ -x /usr/bin/auto-cpufreq ]; then
+        printf '%s\n' "/usr/bin/auto-cpufreq"
+        return 0
+    fi
+    return 1
+}
+
+install_wifi_menu() {
+    print_step "Installing wifi_menu..."
+    local url="https://github.com/paterkleomenis/wifi_menu/releases/latest/download/wifi_menu"
+
+    if curl -fL -o wifi_menu "$url"; then
+        mkdir -p ~/.local/bin
+        chmod +x wifi_menu
+        mv wifi_menu ~/.local/bin/wifi_menu
+        print_step "wifi_menu installed successfully!"
+    else
+        print_warning "Failed to download wifi_menu. You can install it later manually."
+    fi
+}
+
+install_hyprmonitor() {
+    print_step "Installing hypr-tui (Hyprmonitor)..."
+    local base_url="https://github.com/paterkleomenis/Hyprmonitor/releases/latest/download"
+    local target="$HOME/.local/bin/hypr-tui"
+    local compat_target="$HOME/.local/bin/hyprmonitor"
+
+    mkdir -p ~/.local/bin
+
+    if curl -fL -o hypr-tui "$base_url/hypr-tui"; then
+        chmod +x hypr-tui
+        mv hypr-tui "$target"
+        ln -sf "$target" "$compat_target"
+        print_step "hypr-tui installed successfully!"
+        return 0
+    fi
+
+    if curl -fL -o hypr-tui "$base_url/hyprmonitor"; then
+        chmod +x hypr-tui
+        mv hypr-tui "$target"
+        ln -sf "$target" "$compat_target"
+        print_step "hypr-tui installed successfully!"
+    else
+        print_warning "Failed to download hypr-tui. You can install it later manually."
+    fi
+}
+
+get_hyprland_binary() {
+    if command_exists Hyprland; then
+        printf '%s\n' "Hyprland"
+        return 0
+    fi
+
+    if command_exists hyprland; then
+        printf '%s\n' "hyprland"
+        return 0
+    fi
+
+    return 1
+}
+
 # Ask for sudo once and keep it alive for the full install run
 cleanup_sudo_session() {
     [ -n "${SUDO_KEEPALIVE_PID:-}" ] && kill "$SUDO_KEEPALIVE_PID" 2>/dev/null || true
@@ -128,52 +202,12 @@ END {
 
 # Check for required dependencies
 check_dependencies() {
-install_wifi_menu() {
-    print_step "Installing wifi_menu..."
-    local url="https://github.com/paterkleomenis/wifi_menu/releases/latest/download/wifi_menu"
-
-    if curl -L -o wifi_menu "$url"; then
-        mkdir -p ~/.local/bin
-        chmod +x wifi_menu
-        mv wifi_menu ~/.local/bin/wifi_menu
-        print_step "wifi_menu installed successfully!"
-    else
-        print_error "Failed to download wifi_menu."
-    fi
-}
-
-install_hyprmonitor() {
-    print_step "Installing hypr-tui (Hyprmonitor)..."
-    local base_url="https://github.com/paterkleomenis/Hyprmonitor/releases/latest/download"
-    local target="$HOME/.local/bin/hypr-tui"
-    local compat_target="$HOME/.local/bin/hyprmonitor"
-
-    mkdir -p ~/.local/bin
-
-    if curl -fL -o hypr-tui "$base_url/hypr-tui"; then
-        chmod +x hypr-tui
-        mv hypr-tui "$target"
-        ln -sf "$target" "$compat_target"
-        print_step "hypr-tui installed successfully!"
-        return 0
-    fi
-
-    if curl -fL -o hypr-tui "$base_url/hyprmonitor"; then
-        chmod +x hypr-tui
-        mv hypr-tui "$target"
-        ln -sf "$target" "$compat_target"
-        print_step "hypr-tui installed successfully!"
-    else
-        print_error "Failed to download hypr-tui."
-    fi
-}
-
     print_step "Checking for required dependencies..."
     local missing=()
     # Only check for tools needed by the install script itself
     # (jq and wget will be installed by the script)
-    for cmd in git tar; do
-        command -v "$cmd" &>/dev/null || missing+=("$cmd")
+    for cmd in git tar sed awk grep; do
+        command_exists "$cmd" || missing+=("$cmd")
     done
 
     if [ ${#missing[@]} -gt 0 ]; then
@@ -182,6 +216,19 @@ install_hyprmonitor() {
         exit 1
     fi
     print_step "All required dependencies found!"
+}
+
+refresh_font_cache() {
+    if command_exists fc-cache; then
+        print_step "Refreshing font cache..."
+        if fc-cache -f >/dev/null 2>&1; then
+            print_info "Font cache refreshed"
+        else
+            print_warning "Failed to refresh font cache automatically. You can run: fc-cache -f"
+        fi
+    else
+        print_warning "fc-cache not found; skipping font cache refresh"
+    fi
 }
 
 # Backup existing configurations
@@ -285,8 +332,8 @@ PACMAN_PACKAGES=(
   greetd greetd-tuigreet flameshot \
   wireplumber pavucontrol alsa-utils \
   gst-plugins-good gst-plugins-bad gst-plugins-ugly \
-  kdeconnect brightnessctl firefox usbutils \
-  neovim nano curl wget unzip p7zip tar base-devel git ark cmake cpio meson \
+  brightnessctl firefox usbutils \
+  neovim nano curl wget unzip p7zip tar base-devel git ark cmake cpio meson bc \
   ttf-jetbrains-mono-nerd inter-font \
   noto-fonts noto-fonts-cjk noto-fonts-emoji gvfs-mtp mtpfs android-udev \
   baobab pipewire pipewire-alsa pipewire-pulse pipewire-jack \
@@ -319,14 +366,29 @@ if ! sudo pacman -S --needed --noconfirm "${PACMAN_PACKAGES[@]}"; then
 fi
 
 print_step "Main packages installed successfully!"
+refresh_font_cache
+
+print_step "Validating critical binaries..."
+if ! HYPRLAND_BIN="$(get_hyprland_binary)"; then
+    print_error "Hyprland binary is missing after installation."
+    print_info "Install manually with: sudo pacman -S hyprland"
+    exit 1
+fi
+
+if ! command_exists waybar; then
+    print_error "Waybar binary is missing after installation."
+    print_info "Install manually with: sudo pacman -S waybar"
+    exit 1
+fi
+print_info "Detected Hyprland binary: $HYPRLAND_BIN"
 
 # Install paru (AUR helper) if not already installed
 print_step "Checking AUR availability..."
-if ping -c 1 aur.archlinux.org &> /dev/null; then
+if curl -fsSL --connect-timeout 5 https://aur.archlinux.org >/dev/null 2>&1; then
     print_info "AUR is accessible"
     AUR_AVAILABLE=true
 else
-    print_warning "Cannot reach AUR (aur.archlinux.org)"
+    print_warning "Cannot reach AUR over HTTPS (https://aur.archlinux.org)"
     print_warning "AUR packages will be skipped"
     AUR_AVAILABLE=false
 fi
@@ -623,9 +685,14 @@ if ! id -u greeter >/dev/null 2>&1; then
     sudo useradd -r -M -s /usr/bin/nologin greeter
 fi
 
-DEFAULT_GREETD_COMMAND="\"agreety --cmd 'start-hyprland >/dev/null 2>&1'\""
+HYPRLAND_SESSION_CMD="$(get_hyprland_binary || true)"
+if [ -z "$HYPRLAND_SESSION_CMD" ]; then
+    HYPRLAND_SESSION_CMD="Hyprland"
+fi
+
+DEFAULT_GREETD_COMMAND="\"agreety --cmd 'dbus-run-session $HYPRLAND_SESSION_CMD >/dev/null 2>&1'\""
 if command -v tuigreet >/dev/null 2>&1; then
-    DEFAULT_GREETD_COMMAND="\"tuigreet --time --remember --user-menu --sessions /usr/share/wayland-sessions:/usr/share/xsessions --cmd 'start-hyprland >/dev/null 2>&1'\""
+    DEFAULT_GREETD_COMMAND="\"tuigreet --time --remember --user-menu --sessions /usr/share/wayland-sessions:/usr/share/xsessions --cmd 'dbus-run-session $HYPRLAND_SESSION_CMD >/dev/null 2>&1'\""
 fi
 
 SELECTED_GREETD_COMMAND="$DEFAULT_GREETD_COMMAND"
@@ -634,6 +701,8 @@ if [ -n "$EXISTING_GREETD_COMMAND" ]; then
         print_warning "Existing greetd config uses tuigreet, but tuigreet is not installed. Replacing command."
     elif [[ "$EXISTING_GREETD_COMMAND" == *agreety* ]] && ! command -v agreety >/dev/null 2>&1; then
         print_warning "Existing greetd config uses agreety, but agreety is not installed. Replacing command."
+    elif [[ "$EXISTING_GREETD_COMMAND" == *start-hyprland* ]] && ! command_exists start-hyprland; then
+        print_warning "Existing greetd config uses start-hyprland, but it is missing. Replacing command."
     else
         SELECTED_GREETD_COMMAND="$EXISTING_GREETD_COMMAND"
         print_info "Detected existing greetd session command, preserving it"
@@ -731,6 +800,29 @@ if is_laptop; then
     ENABLE_LAPTOP_OPT=${REPLY:-Y}
 
     if [[ $ENABLE_LAPTOP_OPT =~ ^[Yy]$ ]]; then
+        AUTO_CPUFREQ_BIN="$(resolve_auto_cpufreq_binary || true)"
+        AUTO_CPUFREQ_AVAILABLE=false
+
+        if [ -n "$AUTO_CPUFREQ_BIN" ]; then
+            AUTO_CPUFREQ_AVAILABLE=true
+            print_info "Detected auto-cpufreq binary: $AUTO_CPUFREQ_BIN"
+        elif [ "$AUR_AVAILABLE" = true ] && command_exists paru; then
+            print_step "auto-cpufreq not found. Attempting install from AUR..."
+            if paru -S --needed --noconfirm auto-cpufreq; then
+                AUTO_CPUFREQ_BIN="$(resolve_auto_cpufreq_binary || true)"
+                if [ -n "$AUTO_CPUFREQ_BIN" ]; then
+                    AUTO_CPUFREQ_AVAILABLE=true
+                    print_step "auto-cpufreq installed successfully!"
+                fi
+            else
+                print_warning "Failed to install auto-cpufreq from AUR."
+            fi
+        fi
+
+        if [ "$AUTO_CPUFREQ_AVAILABLE" = false ]; then
+            print_warning "auto-cpufreq is unavailable. TLP-only optimization will be applied."
+        fi
+
         # Configure sudoers for passwordless power management
         print_step "Configuring passwordless sudo for power management..."
         SUDOERS_FILE="/etc/sudoers.d/peitharchy"
@@ -742,8 +834,6 @@ if is_laptop; then
 $USERNAME ALL=(ALL) NOPASSWD: /usr/bin/tlp
 $USERNAME ALL=(ALL) NOPASSWD: $SCRIPT_DIR/scripts/toggle-performance.sh
 $USERNAME ALL=(ALL) NOPASSWD: /home/$USERNAME/.local/bin/toggle-performance.sh
-$USERNAME ALL=(ALL) NOPASSWD: /usr/local/bin/auto-cpufreq
-$USERNAME ALL=(ALL) NOPASSWD: /usr/bin/auto-cpufreq
 $USERNAME ALL=(ALL) NOPASSWD: /usr/bin/systemctl start auto-cpufreq
 $USERNAME ALL=(ALL) NOPASSWD: /usr/bin/systemctl stop auto-cpufreq
 $USERNAME ALL=(ALL) NOPASSWD: /usr/bin/systemctl enable auto-cpufreq
@@ -754,6 +844,11 @@ CONTENTS
         then
             print_warning "Failed to write to $SUDOERS_FILE. You may need to enter password for power modes."
         else
+            if [ "$AUTO_CPUFREQ_AVAILABLE" = true ]; then
+                sudo tee -a "$SUDOERS_FILE" > /dev/null <<CONTENTS
+$USERNAME ALL=(ALL) NOPASSWD: $AUTO_CPUFREQ_BIN
+CONTENTS
+            fi
             # Set correct permissions (critical for sudoers files)
             sudo chmod 440 "$SUDOERS_FILE"
             print_info "Passwordless sudo configured for TLP and auto-cpufreq."
@@ -765,9 +860,13 @@ CONTENTS
         print_info "TLP service enabled"
 
         # Disable TLP CPU management by default (let auto-cpufreq handle it)
-        print_step "Configuring TLP to not manage CPU (auto-cpufreq will handle it)..."
+        print_step "Configuring TLP CPU policy..."
         sudo "$SCRIPT_DIR/scripts/toggle-performance.sh" disable_cpu
-        print_info "TLP CPU disabled, auto-cpufreq active"
+        if [ "$AUTO_CPUFREQ_AVAILABLE" = true ]; then
+            print_info "TLP CPU disabled, auto-cpufreq active"
+        else
+            print_info "TLP CPU set to keep/default values (auto-cpufreq unavailable)"
+        fi
     else
         print_info "Skipping laptop power optimization setup."
     fi
