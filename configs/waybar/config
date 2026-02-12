@@ -116,7 +116,8 @@
     },
     "mpris": {
       "format": "{title}",
-      "format-paused": "           {title}",
+      "max-length": 35,
+      "format-paused": "{title}",
       "on-click": "playerctl play-pause",
       "on-click-right": "playerctl next",
       "on-click-middle": "playerctl previous",
