@@ -15,11 +15,10 @@ fi
 CAPACITY=$(cat "$BAT_PATH/capacity")
 STATUS=$(cat "$BAT_PATH/status")
 
-# Get CPU mode
-MODE_FILE="$HOME/.cache/cpu_mode"
+# Get active power profile
 MODE="unknown"
-if [[ -f "$MODE_FILE" ]]; then
-    MODE=$(cat "$MODE_FILE")
+if command -v powerprofilesctl >/dev/null 2>&1; then
+    MODE=$(powerprofilesctl get 2>/dev/null || echo "unknown")
 fi
 
 # Calculate Power Draw (Watts)
@@ -84,4 +83,4 @@ fi
 
 
 # Output JSON for Waybar
-echo "{\"text\": \"${ICON}\", \"tooltip\": \"Battery: ${CAPACITY}% (${STATUS_TEXT})\\nPower: ${POWER_WATTS}W\\nCPU Mode: ${MODE}\", \"class\": \"battery-${STATUS,,}\"}"
+echo "{\"text\": \"${ICON}\", \"tooltip\": \"Battery: ${CAPACITY}% (${STATUS_TEXT})\\nPower: ${POWER_WATTS}W\\nProfile: ${MODE}\", \"class\": \"battery-${STATUS,,}\"}"

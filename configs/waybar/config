@@ -165,7 +165,7 @@
       "return-type": "json",
       "interval": 10,
       "on-click": "~/.local/bin/toggle-performance.sh",
-      "on-click-right": "kitty --class floating_term --title 'Hypr Power' ~/.local/bin/hypr-power-tui",
+      "on-click-right": "~/.local/bin/power-profile-menu.sh",
       "tooltip": true
     },
     "custom/notification": {

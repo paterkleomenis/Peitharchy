@@ -33,22 +33,6 @@ command_exists() {
     command -v "$1" >/dev/null 2>&1
 }
 
-resolve_auto_cpufreq_binary() {
-    if command_exists auto-cpufreq; then
-        command -v auto-cpufreq
-        return 0
-    fi
-    if [ -x /usr/local/bin/auto-cpufreq ]; then
-        printf '%s\n' "/usr/local/bin/auto-cpufreq"
-        return 0
-    fi
-    if [ -x /usr/bin/auto-cpufreq ]; then
-        printf '%s\n' "/usr/bin/auto-cpufreq"
-        return 0
-    fi
-    return 1
-}
-
 install_wifi_menu() {
     print_step "Installing wifi_menu..."
     local url="https://github.com/paterkleomenis/wifi_menu/releases/latest/download/wifi_menu"
@@ -341,10 +325,10 @@ PACMAN_PACKAGES=(
 )
 
 if is_laptop; then
-    print_info "Laptop detected. Including tlp in package install."
-    PACMAN_PACKAGES+=(tlp)
+    print_info "Laptop detected. Including power-profiles-daemon in package install."
+    PACMAN_PACKAGES+=(power-profiles-daemon)
 else
-    print_info "No battery detected. Skipping tlp package."
+    print_info "No battery detected. Skipping power-profiles-daemon package."
 fi
 
 if ! sudo pacman -S --needed --noconfirm "${PACMAN_PACKAGES[@]}"; then
@@ -808,76 +792,25 @@ echo ""
 # Optional laptop power optimization
 if is_laptop; then
     print_step "Laptop detected."
-    read -p "Enable laptop power optimization (TLP + auto-cpufreq)? (Y/n): " -r
+    read -p "Enable laptop power optimization (power-profiles-daemon)? (Y/n): " -r
     ENABLE_LAPTOP_OPT=${REPLY:-Y}
 
     if [[ $ENABLE_LAPTOP_OPT =~ ^[Yy]$ ]]; then
-        AUTO_CPUFREQ_BIN="$(resolve_auto_cpufreq_binary || true)"
-        AUTO_CPUFREQ_AVAILABLE=false
-
-        if [ -n "$AUTO_CPUFREQ_BIN" ]; then
-            AUTO_CPUFREQ_AVAILABLE=true
-            print_info "Detected auto-cpufreq binary: $AUTO_CPUFREQ_BIN"
-        elif [ "$AUR_AVAILABLE" = true ] && command_exists paru; then
-            print_step "auto-cpufreq not found. Attempting install from AUR..."
-            if paru -S --needed --noconfirm auto-cpufreq; then
-                AUTO_CPUFREQ_BIN="$(resolve_auto_cpufreq_binary || true)"
-                if [ -n "$AUTO_CPUFREQ_BIN" ]; then
-                    AUTO_CPUFREQ_AVAILABLE=true
-                    print_step "auto-cpufreq installed successfully!"
-                fi
-            else
-                print_warning "Failed to install auto-cpufreq from AUR."
-            fi
+        # Remove legacy sudoers rules from previous power setup.
+        if [ -f /etc/sudoers.d/peitharchy ]; then
+            print_step "Removing legacy /etc/sudoers.d/peitharchy rules..."
+            sudo rm -f /etc/sudoers.d/peitharchy
         fi
 
-        if [ "$AUTO_CPUFREQ_AVAILABLE" = false ]; then
-            print_warning "auto-cpufreq is unavailable. TLP-only optimization will be applied."
-        fi
+        print_step "Enabling power-profiles-daemon..."
+        sudo systemctl enable --now power-profiles-daemon
+        print_info "power-profiles-daemon service enabled"
 
-        # Configure sudoers for passwordless power management
-        print_step "Configuring passwordless sudo for power management..."
-        SUDOERS_FILE="/etc/sudoers.d/peitharchy"
-        USERNAME=$(whoami)
-
-        # We allow the user to run tlp and auto-cpufreq without password
-        # This allows the toggle scripts to work smoothly
-        if ! sudo tee "$SUDOERS_FILE" > /dev/null <<CONTENTS
-$USERNAME ALL=(ALL) NOPASSWD: /usr/bin/tlp
-$USERNAME ALL=(ALL) NOPASSWD: $SCRIPT_DIR/scripts/toggle-performance.sh
-$USERNAME ALL=(ALL) NOPASSWD: /home/$USERNAME/.local/bin/toggle-performance.sh
-$USERNAME ALL=(ALL) NOPASSWD: /usr/bin/systemctl start auto-cpufreq
-$USERNAME ALL=(ALL) NOPASSWD: /usr/bin/systemctl stop auto-cpufreq
-$USERNAME ALL=(ALL) NOPASSWD: /usr/bin/systemctl enable auto-cpufreq
-$USERNAME ALL=(ALL) NOPASSWD: /usr/bin/systemctl disable auto-cpufreq
-$USERNAME ALL=(ALL) NOPASSWD: /usr/bin/systemctl enable --now tlp
-$USERNAME ALL=(ALL) NOPASSWD: /usr/bin/systemctl disable --now tlp
-CONTENTS
-        then
-            print_warning "Failed to write to $SUDOERS_FILE. You may need to enter password for power modes."
+        if command_exists powerprofilesctl; then
+            powerprofilesctl set balanced || true
+            print_info "Default power profile set to balanced"
         else
-            if [ "$AUTO_CPUFREQ_AVAILABLE" = true ]; then
-                sudo tee -a "$SUDOERS_FILE" > /dev/null <<CONTENTS
-$USERNAME ALL=(ALL) NOPASSWD: $AUTO_CPUFREQ_BIN
-CONTENTS
-            fi
-            # Set correct permissions (critical for sudoers files)
-            sudo chmod 440 "$SUDOERS_FILE"
-            print_info "Passwordless sudo configured for TLP and auto-cpufreq."
-        fi
-
-        # Enable TLP service
-        print_step "Enabling TLP service..."
-        sudo systemctl enable --now tlp
-        print_info "TLP service enabled"
-
-        # Disable TLP CPU management by default (let auto-cpufreq handle it)
-        print_step "Configuring TLP CPU policy..."
-        sudo "$SCRIPT_DIR/scripts/toggle-performance.sh" disable_cpu
-        if [ "$AUTO_CPUFREQ_AVAILABLE" = true ]; then
-            print_info "TLP CPU disabled, auto-cpufreq active"
-        else
-            print_info "TLP CPU set to keep/default values (auto-cpufreq unavailable)"
+            print_warning "powerprofilesctl not found in PATH. Profile controls may not work until next login."
         fi
     else
         print_info "Skipping laptop power optimization setup."

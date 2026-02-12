@@ -1,218 +1,137 @@
 #!/usr/bin/env bash
-# Peitharchy Consolidated Power Manager
-# Handles switching modes (Powersave/Performance) AND granular TLP settings.
+# Peitharchy Power Manager (power-profiles-daemon backend)
+set -euo pipefail
 
 # Use SUDO_USER's home if running under sudo, otherwise use HOME
-if [[ -n "$SUDO_USER" ]]; then
+if [[ -n "${SUDO_USER:-}" ]]; then
     USER_HOME=$(getent passwd "$SUDO_USER" | cut -d: -f6)
 else
     USER_HOME="$HOME"
 fi
 
 MODE_FILE="$USER_HOME/.cache/cpu_mode"
-TLP_CONF="/etc/tlp.conf"
 mkdir -p "$(dirname "$MODE_FILE")"
 
-find_auto_cpufreq() {
-    if command -v auto-cpufreq >/dev/null 2>&1; then
-        command -v auto-cpufreq
-        return 0
-    fi
-    if [[ -x /usr/local/bin/auto-cpufreq ]]; then
-        printf '%s\n' "/usr/local/bin/auto-cpufreq"
-        return 0
-    fi
-    if [[ -x /usr/bin/auto-cpufreq ]]; then
-        printf '%s\n' "/usr/bin/auto-cpufreq"
-        return 0
-    fi
-    return 1
-}
-
-auto_cpufreq_service_exists() {
-    systemctl list-unit-files auto-cpufreq.service --no-legend 2>/dev/null | grep -q '^auto-cpufreq\.service'
-}
-
-AUTO_CPUFREQ_BIN="$(find_auto_cpufreq || true)"
-
-# --- NOTIFICATION HELPER ---
-# Handles notify-send properly when running under sudo
 send_notification() {
     local title="$1"
     local message="$2"
-    
-    if [[ -n "$SUDO_USER" ]]; then
-        # Running under sudo, use the original user's session
-        local user_id=$(id -u "$SUDO_USER")
-        sudo -u "$SUDO_USER" DISPLAY=:0 DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${user_id}/bus" notify-send "$title" "$message" 2>/dev/null || true
+
+    if [[ -n "${SUDO_USER:-}" ]]; then
+        local user_id
+        user_id=$(id -u "$SUDO_USER")
+        sudo -u "$SUDO_USER" DISPLAY=:0 DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${user_id}/bus" \
+            notify-send "$title" "$message" 2>/dev/null || true
     else
         notify-send "$title" "$message" 2>/dev/null || true
     fi
 }
 
-# --- INTERNAL HELPER FUNCTIONS FOR TLP ---
+ppd_available() {
+    command -v powerprofilesctl >/dev/null 2>&1
+}
 
-set_param() {
-    local param=$1
-    local value=$2
-    if grep -q "^#$param" "$TLP_CONF"; then
-        sed -i "s|^#$param=.*|$param=$value|" "$TLP_CONF"
-    elif grep -q "^$param" "$TLP_CONF"; then
-        sed -i "s|^$param=.*|$param=$value|" "$TLP_CONF"
-    else
-        echo "$param=$value" >> "$TLP_CONF"
+get_profile() {
+    powerprofilesctl get 2>/dev/null || true
+}
+
+set_profile() {
+    local profile="$1"
+    powerprofilesctl set "$profile"
+}
+
+available_profiles() {
+    powerprofilesctl list 2>/dev/null | awk '
+    {
+        line=$0
+        gsub(/^[*[:space:]]+/, "", line)
+        if (line ~ /:$/) {
+            sub(/:$/, "", line)
+            if (line != "") print line
+        }
+    }'
+}
+
+try_set_profile() {
+    local profile="$1"
+    if set_profile "$profile"; then
+        return 0
     fi
+    send_notification "Power Mode" "Profile '$profile' is not available right now"
+    return 1
 }
 
-apply_tlp() {
-    tlp start > /dev/null 2>&1
-}
+# Keep old command names for compatibility with existing keybinds/UI.
+COMMAND="${1:-toggle}"
 
-# --- COMMAND HANDLING ---
-
-COMMAND=$1
+if ! ppd_available; then
+    send_notification "Power Mode" "powerprofilesctl not found. Install power-profiles-daemon."
+    exit 1
+fi
 
 case "$COMMAND" in
     "toggle")
-        if [[ -f "$MODE_FILE" ]]; then
-            CURRENT_MODE=$(cat "$MODE_FILE")
-        else
-            CURRENT_MODE="powersave"
+        CURRENT_PROFILE="$(get_profile)"
+        mapfile -t PROFILES < <(available_profiles)
+        if [[ ${#PROFILES[@]} -eq 0 ]]; then
+            exit 0
         fi
 
-        if [[ "$CURRENT_MODE" == "powersave" ]]; then
-            if [[ -n "$AUTO_CPUFREQ_BIN" ]]; then
-                sudo "$AUTO_CPUFREQ_BIN" --force performance
+        NEXT_PROFILE="${PROFILES[0]}"
+        for i in "${!PROFILES[@]}"; do
+            if [[ "${PROFILES[$i]}" == "$CURRENT_PROFILE" ]]; then
+                NEXT_PROFILE="${PROFILES[$(((i + 1) % ${#PROFILES[@]}))]}"
+                break
             fi
-            hyprctl keyword misc:vfr false
-            sudo "$0" internal_disable_wifi
-            sudo "$0" internal_disable_audio
-            sudo "$0" internal_disable_pcie
-            sudo "$0" internal_disable_usb
-            echo "performance" > "$MODE_FILE"
-            send_notification "Power Mode" "Switched to Performance mode ⚡"
+        done
+
+        # No popup noise on unavailable targets during left-click cycling.
+        set_profile "$NEXT_PROFILE" >/dev/null 2>&1 || exit 0
+
+        if [[ "$NEXT_PROFILE" == "performance" ]]; then
+            hyprctl keyword misc:vfr false || true
         else
-            if [[ -n "$AUTO_CPUFREQ_BIN" ]]; then
-                sudo "$AUTO_CPUFREQ_BIN" --force powersave
-            fi
-            hyprctl keyword misc:vfr true
-            sudo "$0" internal_enable_wifi
-            sudo "$0" internal_enable_audio
-            sudo "$0" internal_enable_pcie
-            sudo "$0" internal_enable_usb
-            if command -v bluetoothctl &> /dev/null; then
-                if [[ -z $(bluetoothctl devices Connected) ]]; then
-                    bluetoothctl power off
+            hyprctl keyword misc:vfr true || true
+            if [[ "$NEXT_PROFILE" == "power-saver" ]] && command -v bluetoothctl >/dev/null 2>&1; then
+                if [[ -z "$(bluetoothctl devices Connected)" ]]; then
+                    bluetoothctl power off || true
                 fi
             fi
-            echo "powersave" > "$MODE_FILE"
-            send_notification "Power Mode" "Switched to Power Save mode 🌿"
         fi
+        echo "$NEXT_PROFILE" > "$MODE_FILE"
+        send_notification "Power Mode" "Switched to $NEXT_PROFILE"
         ;;
 
-    "enable_cpu")
-        # Enable TLP CPU = disable auto-cpufreq
-        if auto_cpufreq_service_exists; then
-            systemctl stop auto-cpufreq >/dev/null 2>&1 || true
-            systemctl disable auto-cpufreq >/dev/null 2>&1 || true
-        fi
-        set_param "CPU_SCALING_GOVERNOR_ON_AC" "performance"
-        set_param "CPU_SCALING_GOVERNOR_ON_BAT" "powersave"
-        set_param "CPU_ENERGY_PERF_POLICY_ON_AC" "balance_performance"
-        set_param "CPU_ENERGY_PERF_POLICY_ON_BAT" "balance_power"
-        apply_tlp
-        send_notification "CPU Management" "TLP now controls CPU ⚙️"
+    "status")
+        get_profile
         ;;
 
-    "disable_cpu")
-        # Disable TLP CPU = enable auto-cpufreq
-        set_param "CPU_SCALING_GOVERNOR_ON_AC" "keep"
-        set_param "CPU_SCALING_GOVERNOR_ON_BAT" "keep"
-        set_param "CPU_SCALING_MIN_FREQ_ON_AC" "keep"
-        set_param "CPU_SCALING_MIN_FREQ_ON_BAT" "keep"
-        set_param "CPU_SCALING_MAX_FREQ_ON_AC" "keep"
-        set_param "CPU_SCALING_MAX_FREQ_ON_BAT" "keep"
-        set_param "CPU_BOOST_ON_AC" "keep"
-        set_param "CPU_BOOST_ON_BAT" "keep"
-        set_param "CPU_ENERGY_PERF_POLICY_ON_AC" "keep"
-        set_param "CPU_ENERGY_PERF_POLICY_ON_BAT" "keep"
-        set_param "CPU_MIN_PERF_ON_AC" "keep"
-        set_param "CPU_MIN_PERF_ON_BAT" "keep"
-        set_param "CPU_MAX_PERF_ON_AC" "keep"
-        set_param "CPU_MAX_PERF_ON_BAT" "keep"
-        apply_tlp
-        if [[ -n "$AUTO_CPUFREQ_BIN" ]] && auto_cpufreq_service_exists; then
-            systemctl enable auto-cpufreq >/dev/null 2>&1 || true
-            systemctl start auto-cpufreq >/dev/null 2>&1 || true
-        fi
-        send_notification "CPU Management" "auto-cpufreq now controls CPU 🔄"
+    "set_performance")
+        try_set_profile performance || exit 1
+        hyprctl keyword misc:vfr false || true
+        echo "performance" > "$MODE_FILE"
+        send_notification "Power Mode" "Switched to performance"
         ;;
 
-    "enable_wifi"|"internal_enable_wifi")
-        set_param "WIFI_PWR_ON_BAT" "on"
-        apply_tlp
+    "set_balanced")
+        try_set_profile balanced || exit 1
+        hyprctl keyword misc:vfr true || true
+        echo "balanced" > "$MODE_FILE"
+        send_notification "Power Mode" "Switched to balanced"
         ;;
 
-    "disable_wifi"|"internal_disable_wifi")
-        set_param "WIFI_PWR_ON_BAT" "off"
-        apply_tlp
+    "set_powersave"|"set_power_saver")
+        try_set_profile power-saver || exit 1
+        hyprctl keyword misc:vfr true || true
+        echo "power-saver" > "$MODE_FILE"
+        send_notification "Power Mode" "Switched to power-saver"
         ;;
 
-    "enable_audio"|"internal_enable_audio")
-        set_param "SOUND_POWER_SAVE_ON_BAT" "1"
-        apply_tlp
-        ;;
-
-    "disable_audio"|"internal_disable_audio")
-        set_param "SOUND_POWER_SAVE_ON_BAT" "0"
-        apply_tlp
-        ;;
-
-    "enable_pcie"|"internal_enable_pcie")
-        set_param "PCIE_ASPM_ON_BAT" "powersupersave"
-        apply_tlp
-        ;;
-
-    "disable_pcie"|"internal_disable_pcie")
-        set_param "PCIE_ASPM_ON_BAT" "default"
-        apply_tlp
-        ;;
-
-    "enable_usb"|"internal_enable_usb")
-        set_param "USB_AUTOSUSPEND" "1"
-        apply_tlp
-        ;;
-
-    "disable_usb"|"internal_disable_usb")
-        set_param "USB_AUTOSUSPEND" "0"
-        apply_tlp
-        ;;
-
-    "enable_threshold")
-        set_param "START_CHARGE_THRESH_BAT0" "40"
-        set_param "STOP_CHARGE_THRESH_BAT0" "80"
-        apply_tlp
-        send_notification "Battery" "Charge limit enabled (40-80%) 🔋"
-        ;;
-
-    "disable_threshold")
-        sed -i 's/^START_CHARGE_THRESH_BAT0/#START_CHARGE_THRESH_BAT0/g' "$TLP_CONF"
-        sed -i 's/^STOP_CHARGE_THRESH_BAT0/#STOP_CHARGE_THRESH_BAT0/g' "$TLP_CONF"
-        apply_tlp
-        send_notification "Battery" "Charge limit disabled (full charge) 🔌"
-        ;;
-
-    "start_tlp")
-        systemctl enable --now tlp
-        send_notification "TLP" "TLP service started ✓"
-        ;;
-
-    "stop_tlp")
-        systemctl disable --now tlp
-        send_notification "TLP" "TLP service stopped ✗"
+    "enable_cpu"|"disable_cpu"|"enable_wifi"|"disable_wifi"|"enable_audio"|"disable_audio"|"enable_pcie"|"disable_pcie"|"enable_usb"|"disable_usb"|"enable_threshold"|"disable_threshold"|"start_tlp"|"stop_tlp")
+        send_notification "Power Mode" "Command '$COMMAND' is not used with power-profiles-daemon"
         ;;
 
     *)
+        # Preserve old behavior: unknown command acts as toggle.
         "$0" toggle
         ;;
 esac
