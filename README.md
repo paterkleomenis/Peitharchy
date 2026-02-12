@@ -154,6 +154,7 @@ After installation, configurations are located at:
 
 - **Hyprland**: `~/.config/hypr/`
 - **Waybar**: `~/.config/waybar/`
+- **SwayNC**: `~/.config/swaync/`
 - **Rofi**: `~/.config/rofi/`
 - **Kitty**: `~/.config/kitty/`
 - **Scripts**: `~/.local/bin/`
@@ -267,6 +268,10 @@ The configuration uses a dark theme matching Peitharchy. Colors are defined in t
 ### Waybar Customization
 - Layout: `~/.config/waybar/config`
 - Styling: `~/.config/waybar/style.css`
+
+### SwayNC Customization
+- Config: `~/.config/swaync/config.json`
+- Styling: `~/.config/swaync/style.css`
 
 ### GTK Theme Customization
 - GTK 3.0: `~/.config/gtk-3.0/`
@@ -427,6 +432,9 @@ Peitharchy/
 │   └── window-rules.conf      # Window-specific rules
 ├── rofi/
 │   └── config.rasi            # Rofi launcher config
+├── swaync/
+│   ├── config.json            # Notification daemon settings
+│   └── style.css              # Notification center styling
 ├── scripts/
 │   ├── clipboard_menu.sh      # Clipboard manager script
 │   ├── hyprpm-auto.sh         # Auto-refresh hypr plugins on Hyprland updates

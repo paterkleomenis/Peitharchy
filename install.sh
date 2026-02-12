@@ -588,6 +588,18 @@ if [ -f "$SCRIPT_DIR/configs/waybar/style.css" ]; then
     cp "$SCRIPT_DIR/configs/waybar/style.css" ~/.config/waybar/style.css
 fi
 
+# Copy swaync config if it exists
+if [ -f "$SCRIPT_DIR/configs/swaync/config.json" ]; then
+    print_step "Copying SwayNC config..."
+    cp "$SCRIPT_DIR/configs/swaync/config.json" ~/.config/swaync/config.json
+fi
+
+# Copy swaync style if it exists
+if [ -f "$SCRIPT_DIR/configs/swaync/style.css" ]; then
+    print_step "Copying SwayNC style..."
+    cp "$SCRIPT_DIR/configs/swaync/style.css" ~/.config/swaync/style.css
+fi
+
 # Copy rofi config if it exists
 if [ -f "$SCRIPT_DIR/configs/rofi/config.rasi" ]; then
     print_step "Copying Rofi config..."
